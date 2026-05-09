@@ -1,0 +1,4692 @@
+============================================================
+// FILE: lib/api-spec/openapi.yaml
+============================================================
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Mohim Trading API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: videos
+    description: Video management (YouTube links and uploaded videos)
+  - name: documents
+    description: PDF and text document management
+  - name: strategies
+    description: Trading strategy posts
+  - name: chat
+    description: Community chat messages
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /videos:
+    get:
+      operationId: listVideos
+      tags: [videos]
+      summary: List all videos
+      parameters:
+        - name: section
+          in: query
+          schema:
+            type: string
+            enum: [binary, forex, strategy, general]
+      responses:
+        "200":
+          description: List of videos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Video"
+    post:
+      operationId: createVideo
+      tags: [videos]
+      summary: Add a video (YouTube link or upload reference)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVideoBody"
+      responses:
+        "201":
+          description: Video created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Video"
+
+  /videos/{id}:
+    get:
+      operationId: getVideo
+      tags: [videos]
+      summary: Get a video by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Video details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Video"
+    delete:
+      operationId: deleteVideo
+      tags: [videos]
+      summary: Delete a video
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Video deleted
+
+  /documents:
+    get:
+      operationId: listDocuments
+      tags: [documents]
+      summary: List all documents (PDFs and text)
+      parameters:
+        - name: section
+          in: query
+          schema:
+            type: string
+            enum: [binary, forex, strategy, general]
+      responses:
+        "200":
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
+    post:
+      operationId: createDocument
+      tags: [documents]
+      summary: Create a document entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDocumentBody"
+      responses:
+        "201":
+          description: Document created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+
+  /documents/{id}:
+    get:
+      operationId: getDocument
+      tags: [documents]
+      summary: Get a document by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Document details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+    delete:
+      operationId: deleteDocument
+      tags: [documents]
+      summary: Delete a document
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Document deleted
+
+  /strategies:
+    get:
+      operationId: listStrategies
+      tags: [strategies]
+      summary: List all strategy posts
+      parameters:
+        - name: section
+          in: query
+          schema:
+            type: string
+            enum: [binary, forex, general]
+      responses:
+        "200":
+          description: List of strategies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Strategy"
+    post:
+      operationId: createStrategy
+      tags: [strategies]
+      summary: Create a strategy post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStrategyBody"
+      responses:
+        "201":
+          description: Strategy created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Strategy"
+
+  /strategies/{id}:
+    get:
+      operationId: getStrategy
+      tags: [strategies]
+      summary: Get a strategy by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Strategy details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Strategy"
+    put:
+      operationId: updateStrategy
+      tags: [strategies]
+      summary: Update a strategy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStrategyBody"
+      responses:
+        "200":
+          description: Strategy updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Strategy"
+    delete:
+      operationId: deleteStrategy
+      tags: [strategies]
+      summary: Delete a strategy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Strategy deleted
+
+  /upload-url:
+    post:
+      operationId: getUploadUrl
+      tags: [videos]
+      summary: Get a signed upload URL for a file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlRequestBody"
+      responses:
+        "200":
+          description: Upload URL details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+
+  /messages/{id}:
+    delete:
+      operationId: deleteMessage
+      tags: [chat]
+      summary: Delete a chat message (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Message deleted
+
+  /messages:
+    get:
+      operationId: listMessages
+      tags: [chat]
+      summary: List recent chat messages
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+    post:
+      operationId: createMessage
+      tags: [chat]
+      summary: Post a chat message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMessageBody"
+      responses:
+        "201":
+          description: Message created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+
+  /stats:
+    get:
+      operationId: getSiteStats
+      tags: [health]
+      summary: Get site-wide stats
+      responses:
+        "200":
+          description: Site stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteStats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    SiteStats:
+      type: object
+      properties:
+        totalVideos:
+          type: integer
+        totalDocuments:
+          type: integer
+        totalStrategies:
+          type: integer
+        binaryVideos:
+          type: integer
+        forexVideos:
+          type: integer
+        strategyVideos:
+          type: integer
+      required:
+        - totalVideos
+        - totalDocuments
+        - totalStrategies
+        - binaryVideos
+        - forexVideos
+        - strategyVideos
+
+    Video:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        section:
+          type: string
+          enum: [binary, forex, strategy, general]
+        videoType:
+          type: string
+          enum: [youtube, uploaded]
+        youtubeUrl:
+          type: string
+          nullable: true
+        fileKey:
+          type: string
+          nullable: true
+        fileUrl:
+          type: string
+          nullable: true
+        thumbnailUrl:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - section
+        - videoType
+        - createdAt
+
+    CreateVideoBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        section:
+          type: string
+          enum: [binary, forex, strategy, general]
+        videoType:
+          type: string
+          enum: [youtube, uploaded]
+        youtubeUrl:
+          type: string
+          nullable: true
+        fileUrl:
+          type: string
+          nullable: true
+        fileKey:
+          type: string
+          nullable: true
+        thumbnailUrl:
+          type: string
+          nullable: true
+      required:
+        - title
+        - section
+        - videoType
+
+    Document:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        section:
+          type: string
+          enum: [binary, forex, strategy, general]
+        docType:
+          type: string
+          enum: [pdf, text]
+        content:
+          type: string
+          nullable: true
+        fileKey:
+          type: string
+          nullable: true
+        fileUrl:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - section
+        - docType
+        - createdAt
+
+    CreateDocumentBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        section:
+          type: string
+          enum: [binary, forex, strategy, general]
+        docType:
+          type: string
+          enum: [pdf, text]
+        content:
+          type: string
+          nullable: true
+        fileUrl:
+          type: string
+          nullable: true
+        fileKey:
+          type: string
+          nullable: true
+      required:
+        - title
+        - section
+        - docType
+
+    Strategy:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        section:
+          type: string
+          enum: [binary, forex, general]
+        tags:
+          type: string
+          nullable: true
+        isPinned:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - content
+        - section
+        - isPinned
+        - createdAt
+        - updatedAt
+
+    CreateStrategyBody:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        section:
+          type: string
+          enum: [binary, forex, general]
+        tags:
+          type: string
+          nullable: true
+        isPinned:
+          type: boolean
+      required:
+        - title
+        - content
+        - section
+        - isPinned
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        authorName:
+          type: string
+        content:
+          type: string
+          nullable: true
+        mediaUrl:
+          type: string
+          nullable: true
+        mediaType:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - authorName
+        - createdAt
+
+    CreateMessageBody:
+      type: object
+      properties:
+        authorName:
+          type: string
+        content:
+          type: string
+          nullable: true
+        mediaUrl:
+          type: string
+          nullable: true
+        mediaType:
+          type: string
+          nullable: true
+      required:
+        - authorName
+
+    UploadUrlRequestBody:
+      type: object
+      properties:
+        filename:
+          type: string
+        contentType:
+          type: string
+        uploadType:
+          type: string
+          enum: [video, document]
+      required:
+        - filename
+        - contentType
+        - uploadType
+
+    UploadUrlResponse:
+      type: object
+      properties:
+        uploadUrl:
+          type: string
+        fileKey:
+          type: string
+        publicUrl:
+          type: string
+      required:
+        - uploadUrl
+        - fileKey
+        - publicUrl
+
+
+============================================================
+// FILE: lib/db/src/schema/videos.ts
+============================================================
+import { pgTable, text, serial, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
+
+export const sectionEnum = pgEnum("section", ["binary", "forex", "strategy", "general"]);
+export const videoTypeEnum = pgEnum("video_type", ["youtube", "uploaded"]);
+
+export const videosTable = pgTable("videos", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  section: sectionEnum("section").notNull().default("general"),
+  videoType: videoTypeEnum("video_type").notNull().default("youtube"),
+  youtubeUrl: text("youtube_url"),
+  fileKey: text("file_key"),
+  fileUrl: text("file_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const insertVideoSchema = createInsertSchema(videosTable).omit({ id: true, createdAt: true });
+export type InsertVideo = z.infer<typeof insertVideoSchema>;
+export type Video = typeof videosTable.$inferSelect;
+
+
+============================================================
+// FILE: lib/db/src/schema/documents.ts
+============================================================
+import { pgTable, text, serial, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
+
+export const docTypeEnum = pgEnum("doc_type", ["pdf", "text"]);
+
+export const documentsTable = pgTable("documents", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  section: text("section").notNull().default("general"),
+  docType: docTypeEnum("doc_type").notNull().default("text"),
+  content: text("content"),
+  fileKey: text("file_key"),
+  fileUrl: text("file_url"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const insertDocumentSchema = createInsertSchema(documentsTable).omit({ id: true, createdAt: true });
+export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type Document = typeof documentsTable.$inferSelect;
+
+
+============================================================
+// FILE: lib/db/src/schema/strategies.ts
+============================================================
+import { pgTable, text, serial, timestamp, boolean } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
+
+export const strategiesTable = pgTable("strategies", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  section: text("section").notNull().default("general"),
+  tags: text("tags"),
+  isPinned: boolean("is_pinned").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+});
+
+export const insertStrategySchema = createInsertSchema(strategiesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertStrategy = z.infer<typeof insertStrategySchema>;
+export type Strategy = typeof strategiesTable.$inferSelect;
+
+
+============================================================
+// FILE: lib/db/src/schema/messages.ts
+============================================================
+import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
+
+export const messagesTable = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  authorName: text("author_name").notNull(),
+  content: text("content"),
+  mediaUrl: text("media_url"),
+  mediaType: text("media_type"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const insertMessageSchema = createInsertSchema(messagesTable).omit({ id: true, createdAt: true });
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Message = typeof messagesTable.$inferSelect;
+
+
+============================================================
+// FILE: lib/db/src/schema/settings.ts
+============================================================
+import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+
+export const settingsTable = pgTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type Setting = typeof settingsTable.$inferSelect;
+
+
+============================================================
+// FILE: artifacts/api-server/src/app.ts
+============================================================
+import express, { type Express } from "express";
+import cors from "cors";
+import session from "express-session";
+import pinoHttp from "pino-http";
+import router from "./routes";
+import { logger } from "./lib/logger";
+
+const app: Express = express();
+
+app.use(
+  pinoHttp({
+    logger,
+    serializers: {
+      req(req) {
+        return {
+          id: req.id,
+          method: req.method,
+          url: req.url?.split("?")[0],
+        };
+      },
+      res(res) {
+        return {
+          statusCode: res.statusCode,
+        };
+      },
+    },
+  }),
+);
+app.use(cors({ origin: true, credentials: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/api/uploads", express.static("/home/runner/workspace/uploads"));
+
+const sessionSecret = process.env["SESSION_SECRET"];
+if (!sessionSecret) {
+  throw new Error("SESSION_SECRET environment variable is required");
+}
+
+app.use(
+  session({
+    secret: sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env["NODE_ENV"] === "production",
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    },
+  }),
+);
+
+app.use("/api", router);
+
+export default app;
+
+
+============================================================
+// FILE: artifacts/api-server/src/index.ts
+============================================================
+import app from "./app";
+import { logger } from "./lib/logger";
+
+const rawPort = process.env["PORT"];
+
+if (!rawPort) {
+  throw new Error(
+    "PORT environment variable is required but was not provided.",
+  );
+}
+
+const port = Number(rawPort);
+
+if (Number.isNaN(port) || port <= 0) {
+  throw new Error(`Invalid PORT value: "${rawPort}"`);
+}
+
+app.listen(port, (err) => {
+  if (err) {
+    logger.error({ err }, "Error listening on port");
+    process.exit(1);
+  }
+
+  logger.info({ port }, "Server listening");
+});
+
+
+============================================================
+// FILE: artifacts/api-server/src/routes/index.ts
+============================================================
+import { Router, type IRouter } from "express";
+import healthRouter from "./health";
+import videosRouter from "./videos";
+import documentsRouter from "./documents";
+import strategiesRouter from "./strategies";
+import messagesRouter from "./messages";
+import statsRouter from "./stats";
+import adminRouter from "./admin";
+import uploadRouter from "./upload";
+
+const router: IRouter = Router();
+
+router.use(healthRouter);
+router.use(videosRouter);
+router.use(documentsRouter);
+router.use(strategiesRouter);
+router.use(messagesRouter);
+router.use(statsRouter);
+router.use(adminRouter);
+router.use(uploadRouter);
+
+export default router;
+
+
+============================================================
+// FILE: artifacts/api-server/src/routes/videos.ts
+============================================================
+import { Router } from "express";
+import { db } from "@workspace/db";
+import { videosTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { CreateVideoBody } from "@workspace/api-zod";
+
+const router = Router();
+
+router.get("/videos", async (req, res) => {
+  try {
+    const section = req.query["section"] as string | undefined;
+    let rows;
+    if (section) {
+      rows = await db
+        .select()
+        .from(videosTable)
+        .where(eq(videosTable.section, section as "binary" | "forex" | "strategy" | "general"))
+        .orderBy(videosTable.createdAt);
+    } else {
+      rows = await db.select().from(videosTable).orderBy(videosTable.createdAt);
+    }
+    res.json(rows);
+  } catch (err) {
+    req.log.error({ err }, "Failed to list videos");
+    res.status(500).json({ error: "Failed to fetch videos" });
+  }
+});
+
+router.post("/videos", async (req, res) => {
+  const parsed = CreateVideoBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body", details: parsed.error.flatten() });
+    return;
+  }
+  try {
+    const [row] = await db.insert(videosTable).values(parsed.data).returning();
+    res.status(201).json(row);
+  } catch (err) {
+    req.log.error({ err }, "Failed to create video");
+    res.status(500).json({ error: "Failed to create video" });
+  }
+});
+
+router.get("/videos/:id", async (req, res) => {
+  const id = Number(req.params["id"]);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ error: "Invalid video ID" });
+    return;
+  }
+  try {
+    const [row] = await db.select().from(videosTable).where(eq(videosTable.id, id));
+    if (!row) {
+      res.status(404).json({ error: "Video not found" });
+      return;
+    }
+    res.json(row);
+  } catch (err) {
+    req.log.error({ err }, "Failed to get video");
+    res.status(500).json({ error: "Failed to fetch video" });
+  }
+});
+
+router.delete("/videos/:id", async (req, res) => {
+  const id = Number(req.params["id"]);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ error: "Invalid video ID" });
+    return;
+  }
+  try {
+    await db.delete(videosTable).where(eq(videosTable.id, id));
+    res.status(204).end();
+  } catch (err) {
+    req.log.error({ err }, "Failed to delete video");
+    res.status(500).json({ error: "Failed to delete video" });
+  }
+});
+
+export default router;
+
+
+============================================================
+// FILE: artifacts/api-server/src/routes/documents.ts
+============================================================
+import { Router } from "express";
+import { db } from "@workspace/db";
+import { documentsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { CreateDocumentBody } from "@workspace/api-zod";
+
+const router = Router();
+
+router.get("/documents", async (req, res) => {
+  try {
+    const section = req.query["section"] as string | undefined;
+    let rows;
+    if (section) {
+      rows = await db
+        .select()
+        .from(documentsTable)
+        .where(eq(documentsTable.section, section))
+        .orderBy(documentsTable.createdAt);
+    } else {
+      rows = await db.select().from(documentsTable).orderBy(documentsTable.createdAt);
+    }
+    res.json(rows);
+  } catch (err) {
+    req.log.error({ err }, "Failed to list documents");
+    res.status(500).json({ error: "Failed to fetch documents" });
+  }
+});
+
+router.post("/documents", async (req, res) => {
+  const parsed = CreateDocumentBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body", details: parsed.error.flatten() });
+    return;
+  }
+  try {
+    const [row] = await db.insert(documentsTable).values(parsed.data).returning();
+    res.status(201).json(row);
+  } catch (err) {
+    req.log.error({ err }, "Failed to create document");
+    res.status(500).json({ error: "Failed to create document" });
+  }
+});
+
+router.get("/documents/:id", async (req, res) => {
+  const id = Number(req.params["id"]);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ error: "Invalid document ID" });
+    return;
+  }
+  try {
+    const [row] = await db.select().from(documentsTable).where(eq(documentsTable.id, id));
+    if (!row) {
+      res.status(404).json({ error: "Document not found" });
+      return;
+    }
+    res.json(row);
+  } catch (err) {
+    req.log.error({ err }, "Failed to get document");
+    res.status(500).json({ error: "Failed to fetch document" });
+  }
+});
+
+router.delete("/documents/:id", async (req, res) => {
+  const id = Number(req.params["id"]);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ error: "Invalid document ID" });
+    return;
+  }
+  try {
+    await db.delete(documentsTable).where(eq(documentsTable.id, id));
+    res.status(204).end();
+  } catch (err) {
+    req.log.error({ err }, "Failed to delete document");
+    res.status(500).json({ error: "Failed to delete document" });
+  }
+});
+
+export default router;
+
+
+============================================================
+// FILE: artifacts/api-server/src/routes/strategies.ts
+============================================================
+import { Router } from "express";
+import { db } from "@workspace/db";
+import { strategiesTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { CreateStrategyBody } from "@workspace/api-zod";
+
+const router = Router();
+
+router.get("/strategies", async (req, res) => {
+  try {
+    const section = req.query["section"] as string | undefined;
+    let rows;
+    if (section) {
+      rows = await db
+        .select()
+        .from(strategiesTable)
+        .where(eq(strategiesTable.section, section))
+        .orderBy(strategiesTable.createdAt);
+    } else {
+      rows = await db.select().from(strategiesTable).orderBy(strategiesTable.createdAt);
+    }
+    res.json(rows);
+  } catch (err) {
+    req.log.error({ err }, "Failed to list strategies");
+    res.status(500).json({ error: "Failed to fetch strategies" });
+  }
+});
+
+router.post("/strategies", async (req, res) => {
+  const parsed = CreateStrategyBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body", details: parsed.error.flatten() });
+    return;
+  }
+  try {
+    const [row] = await db.insert(strategiesTable).values(parsed.data).returning();
+    res.status(201).json(row);
+  } catch (err) {
+    req.log.error({ err }, "Failed to create strategy");
+    res.status(500).json({ error: "Failed to create strategy" });
+  }
+});
+
+router.get("/strategies/:id", async (req, res) => {
+  const id = Number(req.params["id"]);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ error: "Invalid strategy ID" });
+    return;
+  }
+  try {
+    const [row] = await db.select().from(strategiesTable).where(eq(strategiesTable.id, id));
+    if (!row) {
+      res.status(404).json({ error: "Strategy not found" });
+      return;
+    }
+    res.json(row);
+  } catch (err) {
+    req.log.error({ err }, "Failed to get strategy");
+    res.status(500).json({ error: "Failed to fetch strategy" });
+  }
+});
+
+router.put("/strategies/:id", async (req, res) => {
+  const id = Number(req.params["id"]);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ error: "Invalid strategy ID" });
+    return;
+  }
+  const parsed = CreateStrategyBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body", details: parsed.error.flatten() });
+    return;
+  }
+  try {
+    const [row] = await db
+      .update(strategiesTable)
+      .set({ ...parsed.data, updatedAt: new Date() })
+      .where(eq(strategiesTable.id, id))
+      .returning();
+    if (!row) {
+      res.status(404).json({ error: "Strategy not found" });
+      return;
+    }
+    res.json(row);
+  } catch (err) {
+    req.log.error({ err }, "Failed to update strategy");
+    res.status(500).json({ error: "Failed to update strategy" });
+  }
+});
+
+router.delete("/strategies/:id", async (req, res) => {
+  const id = Number(req.params["id"]);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ error: "Invalid strategy ID" });
+    return;
+  }
+  try {
+    await db.delete(strategiesTable).where(eq(strategiesTable.id, id));
+    res.status(204).end();
+  } catch (err) {
+    req.log.error({ err }, "Failed to delete strategy");
+    res.status(500).json({ error: "Failed to delete strategy" });
+  }
+});
+
+export default router;
+
+
+============================================================
+// FILE: artifacts/api-server/src/routes/messages.ts
+============================================================
+import { Router } from "express";
+import { db } from "@workspace/db";
+import { messagesTable } from "@workspace/db";
+import { desc, eq } from "drizzle-orm";
+import { CreateMessageBody } from "@workspace/api-zod";
+
+const router = Router();
+
+router.get("/messages", async (req, res) => {
+  try {
+    const rows = await db
+      .select()
+      .from(messagesTable)
+      .orderBy(desc(messagesTable.createdAt))
+      .limit(100);
+    res.json(rows.reverse());
+  } catch (err) {
+    req.log.error({ err }, "Failed to list messages");
+    res.status(500).json({ error: "Failed to fetch messages" });
+  }
+});
+
+router.post("/messages", async (req, res) => {
+  const parsed = CreateMessageBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body", details: parsed.error.flatten() });
+    return;
+  }
+  try {
+    const [row] = await db.insert(messagesTable).values(parsed.data).returning();
+    res.status(201).json(row);
+  } catch (err) {
+    req.log.error({ err }, "Failed to create message");
+    res.status(500).json({ error: "Failed to create message" });
+  }
+});
+
+router.delete("/messages/:id", async (req, res) => {
+  if (!req.session["isAdmin"]) {
+    res.status(403).json({ error: "Admin only" });
+    return;
+  }
+  const id = Number(req.params["id"]);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+  try {
+    await db.delete(messagesTable).where(eq(messagesTable.id, id));
+    res.status(204).end();
+  } catch (err) {
+    req.log.error({ err }, "Failed to delete message");
+    res.status(500).json({ error: "Failed to delete message" });
+  }
+});
+
+export default router;
+
+
+============================================================
+// FILE: artifacts/api-server/src/routes/admin.ts
+============================================================
+import { Router } from "express";
+import nodemailer from "nodemailer";
+import crypto from "node:crypto";
+import { db } from "@workspace/db";
+import { settingsTable } from "@workspace/db";
+import { eq, like } from "drizzle-orm";
+
+const router = Router();
+
+declare module "express-session" {
+  interface SessionData {
+    isAdmin?: boolean;
+  }
+}
+
+interface OtpEntry {
+  code: string;
+  expiresAt: Date;
+}
+
+const otpStore = new Map<string, OtpEntry>();
+
+const ADMIN_EMAIL = "onxy9.info@gmail.com";
+
+function generateOtp(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+async function sendEmail(subject: string, text: string): Promise<void> {
+  const smtpUser = process.env["SMTP_USER"];
+  const smtpPass = process.env["SMTP_PASS"];
+  if (!smtpUser || !smtpPass) {
+    throw new Error(
+      "Email not configured. Please set SMTP_USER and SMTP_PASS in your environment secrets.",
+    );
+  }
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: { user: smtpUser, pass: smtpPass },
+  });
+  await transporter.sendMail({ from: smtpUser, to: ADMIN_EMAIL, subject, text });
+}
+
+async function getAdminPassword(): Promise<string | undefined> {
+  try {
+    const [setting] = await db
+      .select()
+      .from(settingsTable)
+      .where(eq(settingsTable.key, "admin_password"))
+      .limit(1);
+    if (setting) return setting.value;
+  } catch {
+    // fall back to env var
+  }
+  return process.env["ADMIN_PASSWORD"];
+}
+
+async function saveCodeToken(token: string, expiresAt: Date): Promise<void> {
+  await db
+    .insert(settingsTable)
+    .values({ key: `code_token_${token}`, value: expiresAt.toISOString() })
+    .onConflictDoUpdate({
+      target: settingsTable.key,
+      set: { value: expiresAt.toISOString(), updatedAt: new Date() },
+    });
+}
+
+async function getCodeToken(token: string): Promise<{ expiresAt: Date } | null> {
+  try {
+    const [row] = await db
+      .select()
+      .from(settingsTable)
+      .where(eq(settingsTable.key, `code_token_${token}`))
+      .limit(1);
+    if (!row) return null;
+    return { expiresAt: new Date(row.value) };
+  } catch {
+    return null;
+  }
+}
+
+router.post("/admin/login", async (req, res) => {
+  const { password } = req.body as { password?: string };
+  const adminPassword = await getAdminPassword();
+
+  if (!adminPassword) {
+    res.status(500).json({ error: "Admin password not configured" });
+    return;
+  }
+
+  if (!password || password !== adminPassword) {
+    res.status(401).json({ error: "Invalid password" });
+    return;
+  }
+
+  req.session["isAdmin"] = true;
+  res.json({ success: true });
+});
+
+router.post("/admin/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      req.log.error({ err }, "Failed to destroy session");
+      res.status(500).json({ error: "Logout failed" });
+      return;
+    }
+    res.json({ success: true });
+  });
+});
+
+router.get("/admin/status", (req, res) => {
+  res.json({ isAdmin: req.session["isAdmin"] === true });
+});
+
+router.post("/admin/forgot-password-request", async (req, res) => {
+  const code = generateOtp();
+  otpStore.set("forgot-password", {
+    code,
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+  });
+  try {
+    await sendEmail(
+      "Mohim Trading — Password Reset Code",
+      `Your password reset code is: ${code}\n\nThis code expires in 10 minutes.\n\nIf you did not request this, ignore this email.`,
+    );
+    res.json({ success: true });
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Failed to send email";
+    req.log.error({ err }, "Failed to send password reset email");
+    res.status(500).json({ error: message });
+  }
+});
+
+router.post("/admin/forgot-password-verify", async (req, res) => {
+  const { code, newPassword } = req.body as {
+    code?: string;
+    newPassword?: string;
+  };
+  const entry = otpStore.get("forgot-password");
+  if (!entry || !code || !newPassword) {
+    res.status(400).json({ error: "Invalid request" });
+    return;
+  }
+  if (entry.code !== code || entry.expiresAt < new Date()) {
+    res.status(401).json({ error: "Invalid or expired code" });
+    return;
+  }
+  otpStore.delete("forgot-password");
+  try {
+    await db
+      .insert(settingsTable)
+      .values({ key: "admin_password", value: newPassword })
+      .onConflictDoUpdate({
+        target: settingsTable.key,
+        set: { value: newPassword, updatedAt: new Date() },
+      });
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update password");
+    res.status(500).json({ error: "Failed to update password" });
+  }
+});
+
+router.post("/admin/code-request", async (req, res) => {
+  if (!req.session["isAdmin"]) {
+    res.status(403).json({ error: "Admin only" });
+    return;
+  }
+  const code = generateOtp();
+  otpStore.set("code-access", {
+    code,
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+  });
+  try {
+    await sendEmail(
+      "Mohim Trading — Code Access OTP",
+      `Your code access OTP is: ${code}\n\nEnter this in the admin panel to get your website source code link.\n\nExpires in 10 minutes.`,
+    );
+    res.json({ success: true });
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Failed to send email";
+    req.log.error({ err }, "Failed to send code access email");
+    res.status(500).json({ error: message });
+  }
+});
+
+router.post("/admin/code-verify", async (req, res) => {
+  if (!req.session["isAdmin"]) {
+    res.status(403).json({ error: "Admin only" });
+    return;
+  }
+  const { code } = req.body as { code?: string };
+  const entry = otpStore.get("code-access");
+  if (!entry || !code || entry.code !== code || entry.expiresAt < new Date()) {
+    res.status(401).json({ error: "Invalid or expired code" });
+    return;
+  }
+  otpStore.delete("code-access");
+  const token = crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  await saveCodeToken(token, expiresAt);
+  res.json({ token });
+});
+
+const VIEWABLE_FILES = [
+  "lib/api-spec/openapi.yaml",
+  "lib/db/src/schema/videos.ts",
+  "lib/db/src/schema/documents.ts",
+  "lib/db/src/schema/strategies.ts",
+  "lib/db/src/schema/messages.ts",
+  "lib/db/src/schema/settings.ts",
+  "artifacts/api-server/src/app.ts",
+  "artifacts/api-server/src/index.ts",
+  "artifacts/api-server/src/routes/index.ts",
+  "artifacts/api-server/src/routes/videos.ts",
+  "artifacts/api-server/src/routes/documents.ts",
+  "artifacts/api-server/src/routes/strategies.ts",
+  "artifacts/api-server/src/routes/messages.ts",
+  "artifacts/api-server/src/routes/admin.ts",
+  "artifacts/api-server/src/routes/upload.ts",
+  "artifacts/mohim-trading/src/app.tsx",
+  "artifacts/mohim-trading/src/main.tsx",
+  "artifacts/mohim-trading/src/lib/upload.ts",
+  "artifacts/mohim-trading/src/pages/home.tsx",
+  "artifacts/mohim-trading/src/pages/binary.tsx",
+  "artifacts/mohim-trading/src/pages/forex.tsx",
+  "artifacts/mohim-trading/src/pages/strategy.tsx",
+  "artifacts/mohim-trading/src/pages/chat.tsx",
+  "artifacts/mohim-trading/src/pages/admin.tsx",
+  "artifacts/mohim-trading/src/pages/code-access.tsx",
+  "artifacts/mohim-trading/src/components/nav.tsx",
+  "artifacts/mohim-trading/src/components/video-card.tsx",
+  "artifacts/mohim-trading/src/components/document-card.tsx",
+  "artifacts/mohim-trading/src/components/strategy-card.tsx",
+  "artifacts/mohim-trading/vite.config.ts",
+  "artifacts/mohim-trading/package.json",
+  "artifacts/api-server/package.json",
+];
+
+router.get("/admin/code-view/:token", async (req, res) => {
+  const token = req.params["token"] ?? "";
+  const entry = await getCodeToken(token);
+  if (!entry || entry.expiresAt < new Date()) {
+    res.status(401).json({ error: "Invalid or expired token" });
+    return;
+  }
+
+  const { readFile } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+  const root = join(process.cwd(), "../..");
+
+  const files = await Promise.all(
+    VIEWABLE_FILES.map(async (p) => {
+      try {
+        const content = await readFile(join(root, p), "utf-8");
+        return { path: p, content };
+      } catch {
+        return { path: p, content: "(not available)" };
+      }
+    }),
+  );
+
+  res.json(files);
+});
+
+router.post("/admin/code-write", async (req, res) => {
+  const { token, filepath, content } = req.body as { token?: string; filepath?: string; content?: string };
+
+  if (!token || !filepath || content === undefined) {
+    res.status(400).json({ error: "Missing token, filepath, or content" });
+    return;
+  }
+
+  const entry = await getCodeToken(token);
+  if (!entry || entry.expiresAt < new Date()) {
+    res.status(401).json({ error: "Invalid or expired token" });
+    return;
+  }
+
+  if (!VIEWABLE_FILES.includes(filepath)) {
+    res.status(403).json({ error: "File not in allowed list" });
+    return;
+  }
+
+  const { writeFile } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+  const root = join(process.cwd(), "../..");
+  const fullPath = join(root, filepath);
+
+  try {
+    await writeFile(fullPath, content, "utf-8");
+    res.json({ ok: true, filepath });
+  } catch (e) {
+    res.status(500).json({ error: "Failed to write file" });
+  }
+});
+
+export default router;
+
+============================================================
+// FILE: artifacts/api-server/src/routes/upload.ts
+============================================================
+import { Router, type Request, type Response } from "express";
+import crypto from "node:crypto";
+import multer from "multer";
+import path from "node:path";
+import fs from "node:fs";
+
+const UPLOAD_DIR = "/home/runner/workspace/uploads";
+const CHUNK_DIR = "/home/runner/workspace/uploads/chunks";
+for (const d of [UPLOAD_DIR, CHUNK_DIR]) {
+  if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
+}
+
+const ALLOWED_EXTENSIONS = new Set([
+  ".pdf",
+  ".jpg", ".jpeg", ".png", ".gif", ".webp",
+  ".mp4", ".webm", ".mov", ".m4v", ".avi", ".mkv",
+]);
+
+const fileFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
+  const mimeOk = /image\/(jpeg|png|gif|webp)|video\/(mp4|webm|quicktime|x-m4v|x-msvideo|x-matroska)|application\/(pdf|octet-stream|x-pdf)/.test(file.mimetype);
+  const extOk = ALLOWED_EXTENSIONS.has(path.extname(file.originalname).toLowerCase());
+  if (mimeOk || extOk) cb(null, true);
+  else cb(new Error("Only images, videos, and PDFs are allowed"));
+};
+
+const singleUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      cb(null, `${Date.now()}-${crypto.randomUUID().slice(0, 8)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter,
+});
+
+const chunkUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, _file, cb) => {
+      const uploadId = (req.body as Record<string, string>)["uploadId"] ?? "tmp";
+      const dir = path.join(CHUNK_DIR, uploadId);
+      fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    },
+    filename: (req, _file, cb) => {
+      const idx = (req.body as Record<string, string>)["chunkIndex"] ?? "0";
+      cb(null, idx.padStart(6, "0"));
+    },
+  }),
+  limits: { fileSize: 6 * 1024 * 1024 },
+});
+
+const router = Router();
+
+router.post("/upload/media", (req: Request, res: Response) => {
+  singleUpload.single("file")(req, res, (err) => {
+    if (err) {
+      const status = err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE" ? 413 : 400;
+      res.status(status).json({ error: err instanceof Error ? err.message : "Upload failed" });
+      return;
+    }
+    if (!req.file) { res.status(400).json({ error: "No file uploaded" }); return; }
+    res.json({ url: `/api/uploads/${req.file.filename}`, mediaType: req.file.mimetype, filename: req.file.originalname });
+  });
+});
+
+router.post("/upload/chunk", (req: Request, res: Response) => {
+  chunkUpload.single("chunk")(req, res, async (err) => {
+    if (err) {
+      res.status(400).json({ error: err instanceof Error ? err.message : "Chunk upload failed" });
+      return;
+    }
+
+    const body = req.body as Record<string, string>;
+    const uploadId = body["uploadId"];
+    const chunkIndex = parseInt(body["chunkIndex"] ?? "0", 10);
+    const totalChunks = parseInt(body["totalChunks"] ?? "1", 10);
+    const originalName = body["filename"] ?? "upload";
+    const mime = body["mime"] ?? "application/octet-stream";
+
+    if (!uploadId || isNaN(chunkIndex) || isNaN(totalChunks)) {
+      res.status(400).json({ error: "Missing chunk parameters" });
+      return;
+    }
+
+    if (chunkIndex < totalChunks - 1) {
+      res.json({ received: true, chunkIndex });
+      return;
+    }
+
+    const chunkDir = path.join(CHUNK_DIR, uploadId);
+    const ext = path.extname(originalName).toLowerCase() || ".bin";
+    const finalName = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}${ext}`;
+    const finalPath = path.join(UPLOAD_DIR, finalName);
+
+    try {
+      const writeStream = fs.createWriteStream(finalPath);
+      for (let i = 0; i < totalChunks; i++) {
+        const chunkPath = path.join(chunkDir, String(i).padStart(6, "0"));
+        const data = fs.readFileSync(chunkPath);
+        writeStream.write(data);
+      }
+      await new Promise<void>((resolve, reject) => {
+        writeStream.on("finish", resolve);
+        writeStream.on("error", reject);
+        writeStream.end();
+      });
+      fs.rmSync(chunkDir, { recursive: true, force: true });
+      res.json({ url: `/api/uploads/${finalName}`, mediaType: mime, filename: originalName });
+    } catch (e) {
+      res.status(500).json({ error: "Failed to assemble file" });
+    }
+  });
+});
+
+export default router;
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/app.tsx
+============================================================
+(not available)
+
+============================================================
+// FILE: artifacts/mohim-trading/src/main.tsx
+============================================================
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./index.css";
+
+createRoot(document.getElementById("root")!).render(<App />);
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/lib/upload.ts
+============================================================
+const CHUNK_SIZE = 4 * 1024 * 1024;
+const MAX_FILE_SIZE = 8 * 1024 * 1024 * 1024;
+
+export async function uploadFile(
+  file: File,
+  onProgress?: (pct: number) => void,
+): Promise<{ url: string; mediaType: string }> {
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error("File too large. Maximum size is 8GB.");
+  }
+
+  if (file.size <= CHUNK_SIZE) {
+    onProgress?.(10);
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch("/api/upload/media", { method: "POST", body: form });
+    const text = await res.text();
+    let data: { url?: string; mediaType?: string; error?: string } = {};
+    try { data = JSON.parse(text) as typeof data; } catch { data = { error: text.slice(0, 200) || "Server error" }; }
+    if (!res.ok) throw new Error(data.error ?? "Upload failed");
+    onProgress?.(100);
+    return { url: data.url!, mediaType: data.mediaType! };
+  }
+
+  const uploadId = crypto.randomUUID();
+  const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+  let finalResult: { url: string; mediaType: string } | null = null;
+
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * CHUNK_SIZE;
+    const chunk = file.slice(start, Math.min(start + CHUNK_SIZE, file.size));
+
+    const form = new FormData();
+    form.append("uploadId", uploadId);
+    form.append("chunkIndex", String(i));
+    form.append("totalChunks", String(totalChunks));
+    form.append("filename", file.name);
+    form.append("mime", file.type || "application/octet-stream");
+    form.append("chunk", chunk, `chunk-${i}`);
+
+    const res = await fetch("/api/upload/chunk", { method: "POST", body: form });
+    const text = await res.text();
+    let data: { url?: string; mediaType?: string; received?: boolean; error?: string } = {};
+    try { data = JSON.parse(text) as typeof data; } catch { data = { error: text.slice(0, 200) || "Server error" }; }
+    if (!res.ok) throw new Error(data.error ?? `Failed at chunk ${i + 1}/${totalChunks}`);
+
+    onProgress?.(Math.round(((i + 1) / totalChunks) * 100));
+
+    if (data.url) finalResult = { url: data.url, mediaType: data.mediaType! };
+  }
+
+  if (!finalResult) throw new Error("Upload incomplete");
+  return finalResult;
+}
+
+export async function compressImageIfNeeded(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) return file;
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const MAX = 1400;
+      let { width, height } = img;
+      if (width > MAX) { height = Math.round((height * MAX) / width); width = MAX; }
+      if (height > MAX) { width = Math.round((width * MAX) / height); height = MAX; }
+      const canvas = document.createElement("canvas");
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { resolve(file); return; }
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => resolve(blob ? new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" }) : file),
+        "image/jpeg", 0.85,
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file); };
+    img.src = objectUrl;
+  });
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/pages/home.tsx
+============================================================
+import { Link } from "wouter";
+import { TrendingUp, BarChart2, BookOpen, MessageCircle, ArrowRight, Play, FileText, Lightbulb, Sparkles } from "lucide-react";
+import { useGetSiteStats, useListStrategies } from "@workspace/api-client-react";
+import { formatDistanceToNow } from "date-fns";
+
+const features = [
+  {
+    href: "/binary",
+    icon: TrendingUp,
+    title: "Binary Trading",
+    description: "Master binary options trading with expert video tutorials, proven strategies, and in-depth guides for every skill level.",
+    color: "from-yellow-500/20 to-amber-500/10",
+    border: "border-yellow-500/20",
+  },
+  {
+    href: "/forex",
+    icon: BarChart2,
+    title: "Forex Trading",
+    description: "Navigate the forex market with confidence using our curated video library, strategy breakdowns, and technical analysis.",
+    color: "from-amber-400/20 to-yellow-600/10",
+    border: "border-amber-400/20",
+  },
+  {
+    href: "/strategy",
+    icon: BookOpen,
+    title: "Strategy & Analysis",
+    description: "Explore our growing library of time-tested trading strategies, market analysis, and risk management techniques.",
+    color: "from-yellow-600/20 to-amber-700/10",
+    border: "border-yellow-600/20",
+  },
+  {
+    href: "/chat",
+    icon: MessageCircle,
+    title: "Community Chat",
+    description: "Join our active trading community. Share insights, ask questions, and learn from fellow traders in real time.",
+    color: "from-amber-500/20 to-yellow-500/10",
+    border: "border-amber-500/20",
+  },
+];
+
+export default function Home() {
+  const { data: stats } = useGetSiteStats();
+  const { data: strategies = [] } = useListStrategies();
+
+  const latestStrategies = [...strategies]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3);
+
+  return (
+    <div className="flex flex-col">
+      <section className="relative overflow-hidden px-4 py-24 sm:py-32 text-center">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
+        <div className="relative max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium mb-8">
+            <TrendingUp className="w-3.5 h-3.5" />
+            Trading Education Platform
+          </div>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight mb-6">
+            <span className="text-foreground">Trade Smarter</span>
+            <br />
+            <span className="gold-text">With Mohim</span>
+          </h1>
+          <p className="text-xl sm:text-2xl font-semibold gold-text mb-3 tracking-wide">
+            Every click is a calculated strike.
+          </p>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+            Your complete trading education hub — from binary options to forex markets.
+            Access expert video tutorials, strategy guides, and a supportive community.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/binary"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl gold-gradient text-black font-bold text-base hover:opacity-90 transition-opacity"
+            >
+              <Play className="w-4 h-4" />
+              Start Learning
+            </Link>
+            <Link
+              href="/strategy"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-border bg-secondary text-foreground font-medium text-base hover:border-primary/40 transition-colors"
+            >
+              <BookOpen className="w-4 h-4" />
+              View Strategies
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {stats && (
+        <section className="px-4 pb-12">
+          <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {[
+              { label: "Total Videos", value: stats.totalVideos, icon: Play },
+              { label: "Documents", value: stats.totalDocuments, icon: FileText },
+              { label: "Strategies", value: stats.totalStrategies, icon: Lightbulb },
+            ].map(({ label, value, icon: Icon }) => (
+              <div
+                key={label}
+                className="bg-card border border-border rounded-xl p-5 flex flex-col items-center gap-2 text-center"
+              >
+                <Icon className="w-5 h-5 text-primary" />
+                <p className="text-3xl font-black text-primary">{value}</p>
+                <p className="text-sm text-muted-foreground">{label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {latestStrategies.length > 0 && (
+        <section className="px-4 pb-16">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <h2 className="text-xl font-bold">Latest Strategies</h2>
+              </div>
+              <Link
+                href="/strategy"
+                className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
+              >
+                View all <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-4">
+              {latestStrategies.map((s) => (
+                <Link href="/strategy" key={s.id}>
+                  <div className="bg-card border border-border rounded-xl p-4 h-full hover:border-primary/40 transition-colors card-glow cursor-pointer">
+                    <h3 className="font-semibold text-foreground text-sm mb-2 line-clamp-2">{s.title}</h3>
+                    <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3 mb-3">{s.content}</p>
+                    <p className="text-primary/70 text-xs">
+                      {formatDistanceToNow(new Date(s.createdAt), { addSuffix: true })}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="px-4 pb-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3">Everything You Need</h2>
+            <p className="text-muted-foreground text-lg">Comprehensive resources to grow your trading skills</p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-5">
+            {features.map(({ href, icon: Icon, title, description, color, border }) => (
+              <Link key={href} href={href} className="group">
+                <div
+                  className={`relative overflow-hidden rounded-2xl border ${border} bg-gradient-to-br ${color} p-6 h-full transition-all duration-300 card-glow`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
+                        {title}
+                      </h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
+                    </div>
+                  </div>
+                  <div className="mt-5 flex items-center gap-2 text-primary text-sm font-medium">
+                    Explore {title}
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/pages/binary.tsx
+============================================================
+import { useState, useMemo } from "react";
+import { TrendingUp, Play, FileText, X, Search } from "lucide-react";
+import { useListVideos, useListDocuments } from "@workspace/api-client-react";
+import type { Video } from "@workspace/api-client-react";
+import VideoCard from "@/components/video-card";
+import DocumentCard from "@/components/document-card";
+
+function VideoModal({ video, onClose }: { video: Video; onClose: () => void }) {
+  const youtubeId = video.youtubeUrl?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/)?.[1];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
+      <div className="relative w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute -top-10 right-0 text-white/70 hover:text-white flex items-center gap-2 text-sm">
+          <X className="w-4 h-4" /> Close
+        </button>
+        {youtubeId ? (
+          <div className="aspect-video rounded-xl overflow-hidden">
+            <iframe
+              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+              className="w-full h-full"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+            />
+          </div>
+        ) : video.fileUrl ? (
+          <div className="aspect-video rounded-xl overflow-hidden bg-black">
+            <video src={video.fileUrl} controls autoPlay className="w-full h-full" />
+          </div>
+        ) : (
+          <div className="aspect-video rounded-xl bg-secondary flex items-center justify-center">
+            <p className="text-muted-foreground">Video not available</p>
+          </div>
+        )}
+        <h2 className="mt-4 text-lg font-bold text-white">{video.title}</h2>
+        {video.description && <p className="text-white/60 text-sm mt-1">{video.description}</p>}
+      </div>
+    </div>
+  );
+}
+
+export default function BinaryPage() {
+  const [activeTab, setActiveTab] = useState<"videos" | "documents">("videos");
+  const [playingVideo, setPlayingVideo] = useState<Video | null>(null);
+  const [search, setSearch] = useState("");
+
+  const { data: videos = [], isLoading: videosLoading } = useListVideos({ section: "binary" });
+  const { data: documents = [], isLoading: docsLoading } = useListDocuments({ section: "binary" });
+
+  const q = search.toLowerCase().trim();
+  const filteredVideos = useMemo(
+    () => videos.filter((v) => !q || v.title.toLowerCase().includes(q) || (v.description ?? "").toLowerCase().includes(q)),
+    [videos, q],
+  );
+  const filteredDocs = useMemo(
+    () => documents.filter((d) => !q || d.title.toLowerCase().includes(q) || (d.description ?? "").toLowerCase().includes(q)),
+    [documents, q],
+  );
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {playingVideo && <VideoModal video={playingVideo} onClose={() => setPlayingVideo(null)} />}
+
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-black" />
+          </div>
+          <h1 className="text-3xl font-black">Binary Trading</h1>
+        </div>
+        <p className="text-muted-foreground max-w-2xl">
+          Master binary options trading with our curated video library and educational documents.
+          Learn strategies, risk management, and market analysis.
+        </p>
+      </div>
+
+      <div className="relative mb-6">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <input
+          type="text"
+          placeholder="Search videos & guides…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full max-w-md pl-10 pr-10 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors"
+        />
+        {search && (
+          <button
+            onClick={() => setSearch("")}
+            className="absolute left-[calc(max(100%,min(28rem,100%))-2.5rem] right-auto top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            style={{ left: "auto", right: "calc(100% - min(28rem, 100%) + 0.75rem)" }}
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+
+      <div className="flex gap-1 p-1 bg-secondary rounded-xl w-fit mb-8">
+        <button
+          onClick={() => setActiveTab("videos")}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+            activeTab === "videos" ? "bg-primary text-black shadow-sm" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Play className="w-4 h-4" />
+          Videos {filteredVideos.length > 0 && `(${filteredVideos.length})`}
+        </button>
+        <button
+          onClick={() => setActiveTab("documents")}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+            activeTab === "documents" ? "bg-primary text-black shadow-sm" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <FileText className="w-4 h-4" />
+          Documents {filteredDocs.length > 0 && `(${filteredDocs.length})`}
+        </button>
+      </div>
+
+      {activeTab === "videos" && (
+        <>
+          {videosLoading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-card border border-border rounded-xl animate-pulse">
+                  <div className="aspect-video bg-secondary rounded-t-xl" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-4 bg-secondary rounded w-3/4" />
+                    <div className="h-3 bg-secondary rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredVideos.length === 0 ? (
+            <div className="text-center py-20">
+              <Play className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                {search ? "No videos match your search" : "No Videos Yet"}
+              </h3>
+              <p className="text-muted-foreground/70 text-sm">
+                {search ? "Try a different keyword." : "Check back soon — videos are being added regularly."}
+              </p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredVideos.map((v) => (
+                <VideoCard key={v.id} video={v} onPlay={setPlayingVideo} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {activeTab === "documents" && (
+        <>
+          {docsLoading ? (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-card border border-border rounded-xl p-5 animate-pulse">
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-secondary rounded-xl" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-secondary rounded w-3/4" />
+                      <div className="h-3 bg-secondary rounded w-1/2" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredDocs.length === 0 ? (
+            <div className="text-center py-20">
+              <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                {search ? "No documents match your search" : "No Documents Yet"}
+              </h3>
+              <p className="text-muted-foreground/70 text-sm">
+                {search ? "Try a different keyword." : "Documents and guides will appear here."}
+              </p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {filteredDocs.map((d) => (
+                <DocumentCard key={d.id} document={d} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/pages/forex.tsx
+============================================================
+import { useState, useMemo } from "react";
+import { BarChart2, Play, FileText, X, Search } from "lucide-react";
+import { useListVideos, useListDocuments } from "@workspace/api-client-react";
+import type { Video } from "@workspace/api-client-react";
+import VideoCard from "@/components/video-card";
+import DocumentCard from "@/components/document-card";
+
+function VideoModal({ video, onClose }: { video: Video; onClose: () => void }) {
+  const youtubeId = video.youtubeUrl?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/)?.[1];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
+      <div className="relative w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute -top-10 right-0 text-white/70 hover:text-white flex items-center gap-2 text-sm">
+          <X className="w-4 h-4" /> Close
+        </button>
+        {youtubeId ? (
+          <div className="aspect-video rounded-xl overflow-hidden">
+            <iframe
+              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+              className="w-full h-full"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+            />
+          </div>
+        ) : video.fileUrl ? (
+          <div className="aspect-video rounded-xl overflow-hidden bg-black">
+            <video src={video.fileUrl} controls autoPlay className="w-full h-full" />
+          </div>
+        ) : (
+          <div className="aspect-video rounded-xl bg-secondary flex items-center justify-center">
+            <p className="text-muted-foreground">Video not available</p>
+          </div>
+        )}
+        <h2 className="mt-4 text-lg font-bold text-white">{video.title}</h2>
+        {video.description && <p className="text-white/60 text-sm mt-1">{video.description}</p>}
+      </div>
+    </div>
+  );
+}
+
+export default function ForexPage() {
+  const [activeTab, setActiveTab] = useState<"videos" | "documents">("videos");
+  const [playingVideo, setPlayingVideo] = useState<Video | null>(null);
+  const [search, setSearch] = useState("");
+
+  const { data: videos = [], isLoading: videosLoading } = useListVideos({ section: "forex" });
+  const { data: documents = [], isLoading: docsLoading } = useListDocuments({ section: "forex" });
+
+  const q = search.toLowerCase().trim();
+  const filteredVideos = useMemo(
+    () => videos.filter((v) => !q || v.title.toLowerCase().includes(q) || (v.description ?? "").toLowerCase().includes(q)),
+    [videos, q],
+  );
+  const filteredDocs = useMemo(
+    () => documents.filter((d) => !q || d.title.toLowerCase().includes(q) || (d.description ?? "").toLowerCase().includes(q)),
+    [documents, q],
+  );
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {playingVideo && <VideoModal video={playingVideo} onClose={() => setPlayingVideo(null)} />}
+
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center">
+            <BarChart2 className="w-5 h-5 text-black" />
+          </div>
+          <h1 className="text-3xl font-black">Forex Trading</h1>
+        </div>
+        <p className="text-muted-foreground max-w-2xl">
+          Navigate the forex market with confidence. Access expert tutorials on currency pairs,
+          technical analysis, and proven trading systems.
+        </p>
+      </div>
+
+      <div className="relative mb-6">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <input
+          type="text"
+          placeholder="Search videos & guides…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full max-w-md pl-10 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors"
+        />
+      </div>
+
+      <div className="flex gap-1 p-1 bg-secondary rounded-xl w-fit mb-8">
+        <button
+          onClick={() => setActiveTab("videos")}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+            activeTab === "videos" ? "bg-primary text-black shadow-sm" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Play className="w-4 h-4" />
+          Videos {filteredVideos.length > 0 && `(${filteredVideos.length})`}
+        </button>
+        <button
+          onClick={() => setActiveTab("documents")}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+            activeTab === "documents" ? "bg-primary text-black shadow-sm" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <FileText className="w-4 h-4" />
+          Documents {filteredDocs.length > 0 && `(${filteredDocs.length})`}
+        </button>
+      </div>
+
+      {activeTab === "videos" && (
+        videosLoading ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-card border border-border rounded-xl animate-pulse">
+                <div className="aspect-video bg-secondary rounded-t-xl" />
+                <div className="p-4 space-y-2"><div className="h-4 bg-secondary rounded w-3/4" /></div>
+              </div>
+            ))}
+          </div>
+        ) : filteredVideos.length === 0 ? (
+          <div className="text-center py-20">
+            <Play className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+              {search ? "No videos match your search" : "No Forex Videos Yet"}
+            </h3>
+            <p className="text-muted-foreground/70 text-sm">
+              {search ? "Try a different keyword." : "Forex trading videos will appear here once added."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredVideos.map((v) => (
+              <VideoCard key={v.id} video={v} onPlay={setPlayingVideo} />
+            ))}
+          </div>
+        )
+      )}
+
+      {activeTab === "documents" && (
+        docsLoading ? (
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-card border border-border rounded-xl p-5 animate-pulse">
+                <div className="h-12 bg-secondary rounded" />
+              </div>
+            ))}
+          </div>
+        ) : filteredDocs.length === 0 ? (
+          <div className="text-center py-20">
+            <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+              {search ? "No documents match your search" : "No Documents Yet"}
+            </h3>
+            <p className="text-muted-foreground/70 text-sm">
+              {search ? "Try a different keyword." : "Forex guides and documents will appear here."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 gap-4">
+            {filteredDocs.map((d) => (
+              <DocumentCard key={d.id} document={d} />
+            ))}
+          </div>
+        )
+      )}
+    </div>
+  );
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/pages/strategy.tsx
+============================================================
+import { BookOpen } from "lucide-react";
+import { useListStrategies } from "@workspace/api-client-react";
+import StrategyCard from "@/components/strategy-card";
+
+export default function StrategyPage() {
+  const { data: strategies = [], isLoading } = useListStrategies();
+
+  const pinned = strategies.filter((s) => s.isPinned);
+  const regular = strategies.filter((s) => !s.isPinned);
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center">
+            <BookOpen className="w-5 h-5 text-black" />
+          </div>
+          <h1 className="text-3xl font-black">Strategies & Analysis</h1>
+        </div>
+        <p className="text-muted-foreground max-w-2xl">
+          Explore our library of time-tested trading strategies, market analysis, and risk management techniques 
+          curated by experienced traders.
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-xl p-5 animate-pulse">
+              <div className="h-5 bg-secondary rounded w-2/5 mb-3" />
+              <div className="space-y-2">
+                <div className="h-3 bg-secondary rounded" />
+                <div className="h-3 bg-secondary rounded w-4/5" />
+                <div className="h-3 bg-secondary rounded w-3/5" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : strategies.length === 0 ? (
+        <div className="text-center py-20">
+          <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-muted-foreground mb-2">No Strategies Yet</h3>
+          <p className="text-muted-foreground/70 text-sm">Trading strategies will appear here once added by the admin.</p>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {pinned.length > 0 && (
+            <section>
+              <h2 className="text-sm font-semibold text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-primary" />
+                Pinned Strategies
+              </h2>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {pinned.map((s) => (
+                  <StrategyCard key={s.id} strategy={s} />
+                ))}
+              </div>
+            </section>
+          )}
+          {regular.length > 0 && (
+            <section>
+              {pinned.length > 0 && (
+                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-muted-foreground" />
+                  All Strategies
+                </h2>
+              )}
+              <div className="grid sm:grid-cols-2 gap-4">
+                {regular.map((s) => (
+                  <StrategyCard key={s.id} strategy={s} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/pages/chat.tsx
+============================================================
+import { useState, useEffect, useRef, useCallback } from "react";
+import { MessageCircle, Send, User, Paperclip, Trash2, X, Image } from "lucide-react";
+import { useListMessages, useCreateMessage, useDeleteMessage } from "@workspace/api-client-react";
+import { formatDistanceToNow } from "date-fns";
+import type { ChatMessage } from "@workspace/api-client-react";
+import { uploadFile, compressImageIfNeeded } from "@/lib/upload";
+
+function MessageBubble({
+  message,
+  isAdmin,
+  onDelete,
+}: {
+  message: ChatMessage;
+  isAdmin: boolean;
+  onDelete: (id: number) => void;
+}) {
+  const time = formatDistanceToNow(new Date(message.createdAt), { addSuffix: true });
+  return (
+    <div className="flex items-start gap-3 group">
+      <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <User className="w-4 h-4 text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2 mb-1">
+          <span className="font-semibold text-sm text-foreground">{message.authorName}</span>
+          <span className="text-xs text-muted-foreground">{time}</span>
+          {isAdmin && (
+            <button
+              onClick={() => onDelete(message.id)}
+              className="ml-auto opacity-0 group-hover:opacity-100 flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-all"
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+        {message.content && (
+          <p className="text-sm text-foreground/90 leading-relaxed bg-secondary/50 rounded-xl rounded-tl-sm px-3 py-2 inline-block max-w-full break-words">
+            {message.content}
+          </p>
+        )}
+        {message.mediaUrl && (
+          <div className="mt-2 max-w-sm">
+            {message.mediaType?.startsWith("image") ? (
+              <img
+                src={message.mediaUrl}
+                alt="media"
+                className="rounded-xl border border-border max-h-64 object-contain cursor-pointer"
+                onClick={() => window.open(message.mediaUrl!, "_blank")}
+              />
+            ) : message.mediaType?.startsWith("video") ? (
+              <video
+                src={message.mediaUrl}
+                controls
+                preload="none"
+                className="rounded-xl border border-border max-h-64 w-full"
+              />
+            ) : message.mediaType === "application/pdf" ? (
+              <a
+                href={message.mediaUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary border border-border text-primary text-sm hover:border-primary/40 transition-colors"
+              >
+                <Image className="w-4 h-4" />
+                View PDF
+              </a>
+            ) : (
+              <a href={message.mediaUrl} target="_blank" rel="noreferrer" className="text-primary text-sm underline">
+                View attachment
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function ChatPage() {
+  const [name, setName] = useState(() => localStorage.getItem("chatName") || "");
+  const [nameSet, setNameSet] = useState(!!localStorage.getItem("chatName"));
+  const [inputName, setInputName] = useState("");
+  const [message, setMessage] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  const { data: messages = [], refetch } = useListMessages();
+  const { mutate: sendMessage, isPending } = useCreateMessage();
+  const { mutate: deleteMessage } = useDeleteMessage();
+
+  const checkAdmin = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/status", { credentials: "include" });
+      const data = await res.json() as { isAdmin: boolean };
+      setIsAdmin(data.isAdmin);
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => { checkAdmin(); }, [checkAdmin]);
+
+  useEffect(() => {
+    const interval = setInterval(() => refetch(), 3000);
+    return () => clearInterval(interval);
+  }, [refetch]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSetName = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputName.trim()) return;
+    const n = inputName.trim();
+    setName(n);
+    setNameSet(true);
+    localStorage.setItem("chatName", n);
+  };
+
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim() || !name) return;
+    sendMessage(
+      { data: { authorName: name, content: message.trim() } },
+      { onSuccess: () => { setMessage(""); refetch(); } },
+    );
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.files?.[0];
+    if (!raw || !name) return;
+    e.target.value = "";
+
+    const MAX_SIZE = 8 * 1024 * 1024;
+    if (raw.size > MAX_SIZE) {
+      alert("File too large. Maximum size is 8GB.");
+      return;
+    }
+
+    setUploading(true);
+    setUploadProgress(0);
+    try {
+      const file = await compressImageIfNeeded(raw);
+      const { url, mediaType } = await uploadFile(file, (pct) => setUploadProgress(pct));
+      sendMessage(
+        { data: { authorName: name, content: null, mediaUrl: url, mediaType } },
+        { onSuccess: () => refetch() },
+      );
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Upload failed. Please check your connection and try again.");
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    deleteMessage({ id }, { onSuccess: () => refetch() });
+  };
+
+  if (!nameSet) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 rounded-2xl gold-gradient flex items-center justify-center mx-auto mb-4">
+            <MessageCircle className="w-8 h-8 text-black" />
+          </div>
+          <h1 className="text-2xl font-black mb-2">Community Chat</h1>
+          <p className="text-muted-foreground text-sm">Enter your name to join the conversation</p>
+        </div>
+        <form onSubmit={handleSetName} className="bg-card border border-border rounded-2xl p-6">
+          <label className="block text-sm font-medium text-foreground mb-2">Your Name</label>
+          <input
+            type="text"
+            value={inputName}
+            onChange={(e) => setInputName(e.target.value)}
+            placeholder="e.g. Mohim Trader"
+            className="w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors mb-4"
+            maxLength={30}
+            autoFocus
+          />
+          <button
+            type="submit"
+            disabled={!inputName.trim()}
+            className="w-full py-3 rounded-xl gold-gradient text-black font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+          >
+            Join Chat
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-6 flex flex-col" style={{ height: "calc(100vh - 4rem)" }}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl gold-gradient flex items-center justify-center">
+            <MessageCircle className="w-5 h-5 text-black" />
+          </div>
+          <div>
+            <h1 className="text-lg font-black">Community Chat</h1>
+            <p className="text-xs text-muted-foreground">{messages.length} messages</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <span className="text-xs text-muted-foreground">{name}</span>
+          <button
+            onClick={() => { setNameSet(false); localStorage.removeItem("chatName"); }}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors ml-2"
+          >
+            Change
+          </button>
+        </div>
+      </div>
+
+      <div className="flex-1 bg-card border border-border rounded-2xl overflow-hidden flex flex-col min-h-0">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <MessageCircle className="w-10 h-10 text-muted-foreground/30 mb-3" />
+              <p className="text-muted-foreground font-medium text-sm">No messages yet</p>
+              <p className="text-muted-foreground/60 text-xs mt-1">Be the first to say something!</p>
+            </div>
+          ) : (
+            messages.map((msg) => (
+              <MessageBubble
+                key={msg.id}
+                message={msg}
+                isAdmin={isAdmin}
+                onDelete={handleDelete}
+              />
+            ))
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        <div className="border-t border-border p-3">
+          {uploading && (
+            <div className="mb-2">
+              <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                <span>Uploading…</span><span>{uploadProgress}%</span>
+              </div>
+              <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+                <div className="h-full gold-gradient rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+              </div>
+            </div>
+          )}
+          <form onSubmit={handleSend} className="flex gap-2 items-center">
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/*,application/pdf" onChange={handleFileChange} />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              title="Share image, video, or PDF (max 8GB)"
+              className="flex-shrink-0 w-10 h-10 rounded-xl bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors disabled:opacity-40"
+            >
+              {uploading ? (
+                <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              ) : (
+                <Paperclip className="w-4 h-4" />
+              )}
+            </button>
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type a message…"
+              className="flex-1 px-4 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors"
+              maxLength={500}
+            />
+            <button
+              type="submit"
+              disabled={!message.trim() || isPending}
+              className="px-4 py-2.5 rounded-xl gold-gradient text-black font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity flex items-center gap-2"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
+          <p className="text-center text-xs text-muted-foreground/50 mt-1.5">
+            📎 Attach images, videos, or PDFs from your gallery
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/pages/admin.tsx
+============================================================
+import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  Settings, Lock, LogOut, Plus, TrendingUp, BarChart2, BookOpen,
+  Play, FileText, Lightbulb, Youtube, Upload, Pencil, X, MessageCircle, Trash2, Code2,
+  Send, Check, AlertCircle, RefreshCw,
+} from "lucide-react";
+import {
+  useListVideos, useCreateVideo, useDeleteVideo,
+  useListDocuments, useCreateDocument, useDeleteDocument,
+  useListStrategies, useCreateStrategy, useDeleteStrategy, useUpdateStrategy,
+  useListMessages, useDeleteMessage,
+} from "@workspace/api-client-react";
+import type { Strategy } from "@workspace/api-client-react";
+import VideoCard from "@/components/video-card";
+import DocumentCard from "@/components/document-card";
+import StrategyCard from "@/components/strategy-card";
+import { useToast } from "@/hooks/use-toast";
+import { uploadFile, compressImageIfNeeded } from "@/lib/upload";
+
+type Section = "binary" | "forex" | "general";
+type VideoSection = "binary" | "forex" | "strategy" | "general";
+type AdminTab = "videos" | "documents" | "strategies" | "messages" | "code";
+type VideoMode = "youtube" | "upload";
+type DocMode = "text" | "upload";
+type LoginStep = "password" | "forgot-request" | "forgot-verify";
+
+function LoginForm({ onLogin }: { onLogin: () => void }) {
+  const [step, setStep] = useState<LoginStep>("password");
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ password }),
+      });
+      if (res.ok) {
+        onLogin();
+      } else {
+        setError("Incorrect password. Try again.");
+      }
+    } catch {
+      setError("Connection error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/forgot-password-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      if (res.ok) {
+        setInfo("A reset code has been sent to your email.");
+        setStep("forgot-verify");
+      } else {
+        const d = await res.json() as { error?: string };
+        setError(d.error ?? "Failed to send code.");
+      }
+    } catch {
+      setError("Connection error.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/forgot-password-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ code: otp, newPassword }),
+      });
+      if (res.ok) {
+        setInfo("Password updated! You can now log in.");
+        setStep("password");
+        setOtp("");
+        setNewPassword("");
+      } else {
+        const d = await res.json() as { error?: string };
+        setError(d.error ?? "Invalid code.");
+      }
+    } catch {
+      setError("Connection error.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-sm mx-auto px-4 py-20">
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 rounded-2xl gold-gradient flex items-center justify-center mx-auto mb-4">
+          <Lock className="w-8 h-8 text-black" />
+        </div>
+        <h1 className="text-2xl font-black mb-1">Admin Panel</h1>
+        <p className="text-muted-foreground text-sm">
+          {step === "password" && "Enter password to manage content"}
+          {step === "forgot-request" && "Reset your admin password"}
+          {step === "forgot-verify" && "Enter the code sent to your email"}
+        </p>
+      </div>
+
+      <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+        {info && (
+          <div className="flex items-center gap-2 text-xs text-green-500 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">
+            <Check className="w-3.5 h-3.5 flex-shrink-0" />
+            {info}
+          </div>
+        )}
+
+        {step === "password" && (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors"
+                placeholder="Enter admin password"
+                autoFocus
+              />
+              {error && <p className="text-destructive text-xs mt-2">{error}</p>}
+            </div>
+            <button
+              type="submit"
+              disabled={!password || loading}
+              className="w-full py-3 rounded-xl gold-gradient text-black font-bold disabled:opacity-40 hover:opacity-90 transition-opacity"
+            >
+              {loading ? "Logging in…" : "Login"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStep("forgot-request"); setError(""); setInfo(""); }}
+              className="w-full text-center text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              Forgot password?
+            </button>
+          </form>
+        )}
+
+        {step === "forgot-request" && (
+          <form onSubmit={handleForgotRequest} className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              A 6-digit code will be sent to your registered admin email.
+            </p>
+            {error && <p className="text-destructive text-xs">{error}</p>}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 rounded-xl gold-gradient text-black font-bold disabled:opacity-40 hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+            >
+              {loading ? <><RefreshCw className="w-4 h-4 animate-spin" /> Sending…</> : <><Send className="w-4 h-4" /> Send Reset Code</>}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStep("password"); setError(""); }}
+              className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Back to login
+            </button>
+          </form>
+        )}
+
+        {step === "forgot-verify" && (
+          <form onSubmit={handleForgotVerify} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">6-Digit Code</label>
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground text-center text-xl font-mono tracking-widest focus:outline-none focus:border-primary/50 transition-colors"
+                placeholder="000000"
+                maxLength={6}
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">New Password</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                placeholder="Enter new password"
+              />
+            </div>
+            {error && <p className="text-destructive text-xs">{error}</p>}
+            <button
+              type="submit"
+              disabled={otp.length < 6 || !newPassword || loading}
+              className="w-full py-3 rounded-xl gold-gradient text-black font-bold disabled:opacity-40 hover:opacity-90 transition-opacity"
+            >
+              {loading ? "Verifying…" : "Set New Password"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStep("forgot-request"); setError(""); }}
+              className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Resend code
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EditStrategyModal({
+  strategy,
+  onClose,
+  onSave,
+}: {
+  strategy: Strategy;
+  onClose: () => void;
+  onSave: (id: number, data: { title: string; content: string; tags: string | null; isPinned: boolean; section: string }) => void;
+}) {
+  const [form, setForm] = useState({
+    title: strategy.title,
+    content: strategy.content,
+    tags: strategy.tags ?? "",
+    isPinned: strategy.isPinned ?? false,
+    section: strategy.section,
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="font-bold text-lg">Edit Strategy</h3>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+        <div className="space-y-3">
+          <input
+            type="text"
+            placeholder="Strategy title"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            className="w-full px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+          />
+          <select
+            value={form.section}
+            onChange={(e) => setForm({ ...form, section: e.target.value as "binary" | "forex" | "general" })}
+            className="w-full px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm focus:outline-none focus:border-primary/50 transition-colors"
+          >
+            <option value="binary">Binary</option>
+            <option value="forex">Forex</option>
+            <option value="general">General</option>
+          </select>
+          <textarea
+            placeholder="Strategy content…"
+            value={form.content}
+            onChange={(e) => setForm({ ...form, content: e.target.value })}
+            rows={6}
+            className="w-full px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors resize-none"
+          />
+          <input
+            type="text"
+            placeholder="Tags (comma separated)"
+            value={form.tags}
+            onChange={(e) => setForm({ ...form, tags: e.target.value })}
+            className="w-full px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+          />
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.isPinned}
+              onChange={(e) => setForm({ ...form, isPinned: e.target.checked })}
+              className="w-4 h-4 accent-yellow-400"
+            />
+            <span className="text-sm text-foreground">Pin this strategy</span>
+          </label>
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl border border-border bg-secondary text-foreground text-sm font-medium hover:border-primary/30 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => onSave(strategy.id, { ...form, tags: form.tags || null })}
+              disabled={!form.title || !form.content}
+              className="flex-1 py-2.5 rounded-xl gold-gradient text-black text-sm font-bold disabled:opacity-40 hover:opacity-90 transition-opacity"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function AdminPage() {
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const { toast } = useToast();
+  const videoFileRef = useRef<HTMLInputElement>(null);
+  const docFileRef = useRef<HTMLInputElement>(null);
+
+  const checkStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/status", { credentials: "include" });
+      const data = await res.json() as { isAdmin: boolean };
+      setIsAdmin(data.isAdmin);
+    } catch {
+      setIsAdmin(false);
+    }
+  }, []);
+
+  useEffect(() => { checkStatus(); }, [checkStatus]);
+
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
+    setIsAdmin(false);
+  };
+
+  const [tab, setTab] = useState<AdminTab>("videos");
+  const [section, setSection] = useState<VideoSection>("binary");
+  const [videoMode, setVideoMode] = useState<VideoMode>("youtube");
+  const [docMode, setDocMode] = useState<DocMode>("text");
+  const [editingStrategy, setEditingStrategy] = useState<Strategy | null>(null);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [docUploading, setDocUploading] = useState(false);
+  const [videoUploadPct, setVideoUploadPct] = useState(0);
+  const [docUploadPct, setDocUploadPct] = useState(0);
+
+  const [codeStep, setCodeStep] = useState<"idle" | "sent" | "done">("idle");
+  const [codeOtp, setCodeOtp] = useState("");
+  const [codeToken, setCodeToken] = useState("");
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeError, setCodeError] = useState("");
+
+  const { data: videos = [], refetch: refetchVideos } = useListVideos({ section });
+  const { data: documents = [], refetch: refetchDocs } = useListDocuments({ section });
+  const { data: strategies = [], refetch: refetchStrats } = useListStrategies();
+  const { data: messages = [], refetch: refetchMessages } = useListMessages();
+
+  const { mutate: createVideo } = useCreateVideo();
+  const { mutate: deleteVideo } = useDeleteVideo();
+  const { mutate: createDocument } = useCreateDocument();
+  const { mutate: deleteDocument } = useDeleteDocument();
+  const { mutate: createStrategy } = useCreateStrategy();
+  const { mutate: deleteStrategy } = useDeleteStrategy();
+  const { mutate: updateStrategy } = useUpdateStrategy();
+  const { mutate: deleteMessage } = useDeleteMessage();
+
+  const [videoForm, setVideoForm] = useState({ title: "", description: "", youtubeUrl: "" });
+  const [docForm, setDocForm] = useState({ title: "", description: "", content: "", docType: "text" as "text" | "pdf" });
+  const [stratForm, setStratForm] = useState({ title: "", content: "", tags: "", isPinned: false, section: "general" as Section });
+
+  const handleVideoFileUpload = async (file: File) => {
+    if (!videoForm.title) { toast({ title: "Please enter a title first", variant: "destructive" }); return; }
+    setVideoUploading(true);
+    setVideoUploadPct(0);
+    try {
+      const compressed = await compressImageIfNeeded(file);
+      const { url } = await uploadFile(compressed, (pct) => setVideoUploadPct(pct));
+      createVideo(
+        { data: { title: videoForm.title, description: videoForm.description || null, section, videoType: "uploaded", fileUrl: url } },
+        { onSuccess: () => { setVideoForm({ title: "", description: "", youtubeUrl: "" }); refetchVideos(); toast({ title: "Video uploaded!" }); } },
+      );
+    } catch (err) {
+      toast({ title: err instanceof Error ? err.message : "Upload failed. Check your connection.", variant: "destructive" });
+    } finally {
+      setVideoUploading(false);
+      setVideoUploadPct(0);
+    }
+  };
+
+  const handleDocFileUpload = async (file: File) => {
+    if (!docForm.title) { toast({ title: "Please enter a title first", variant: "destructive" }); return; }
+    setDocUploading(true);
+    setDocUploadPct(0);
+    try {
+      const compressed = await compressImageIfNeeded(file);
+      const { url } = await uploadFile(compressed, (pct) => setDocUploadPct(pct));
+      createDocument(
+        { data: { title: docForm.title, description: docForm.description || null, section, docType: "pdf", fileUrl: url, content: null } },
+        { onSuccess: () => { setDocForm({ title: "", description: "", content: "", docType: "text" }); refetchDocs(); toast({ title: "Document uploaded!" }); } },
+      );
+    } catch (err) {
+      toast({ title: err instanceof Error ? err.message : "Upload failed. Check your connection.", variant: "destructive" });
+    } finally {
+      setDocUploading(false);
+      setDocUploadPct(0);
+    }
+  };
+
+  const handleCodeRequest = async () => {
+    setCodeLoading(true);
+    setCodeError("");
+    try {
+      const res = await fetch("/api/admin/code-request", { method: "POST", credentials: "include" });
+      if (res.ok) { setCodeStep("sent"); }
+      else { const d = await res.json() as { error?: string }; setCodeError(d.error ?? "Failed"); }
+    } catch { setCodeError("Connection error"); }
+    finally { setCodeLoading(false); }
+  };
+
+  const handleCodeVerify = async () => {
+    if (codeOtp.length < 6) return;
+    setCodeLoading(true);
+    setCodeError("");
+    try {
+      const res = await fetch("/api/admin/code-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ code: codeOtp }),
+      });
+      if (res.ok) {
+        const d = await res.json() as { token: string };
+        setCodeToken(d.token);
+        setCodeStep("done");
+      } else {
+        const d = await res.json() as { error?: string };
+        setCodeError(d.error ?? "Invalid code");
+      }
+    } catch { setCodeError("Connection error"); }
+    finally { setCodeLoading(false); }
+  };
+
+  if (isAdmin === null) return null;
+  if (!isAdmin) return <LoginForm onLogin={() => setIsAdmin(true)} />;
+
+  const sections: VideoSection[] = ["binary", "forex", "strategy", "general"];
+  const tabs: { key: AdminTab; label: string; icon: React.ElementType }[] = [
+    { key: "videos", label: "Videos", icon: Play },
+    { key: "documents", label: "Documents", icon: FileText },
+    { key: "strategies", label: "Strategies", icon: BookOpen },
+    { key: "messages", label: "Messages", icon: MessageCircle },
+    { key: "code", label: "Code Access", icon: Code2 },
+  ];
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      {editingStrategy && (
+        <EditStrategyModal
+          strategy={editingStrategy}
+          onClose={() => setEditingStrategy(null)}
+          onSave={(id, data) => {
+            updateStrategy(
+              { id, data: { title: data.title, content: data.content, section: data.section as Section, tags: data.tags, isPinned: data.isPinned } },
+              {
+                onSuccess: () => {
+                  setEditingStrategy(null);
+                  refetchStrats();
+                  toast({ title: "Strategy updated" });
+                },
+              },
+            );
+          }}
+        />
+      )}
+
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center">
+            <Settings className="w-5 h-5 text-black" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black">Admin Panel</h1>
+            <p className="text-muted-foreground text-sm">Manage all trading content</p>
+          </div>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-secondary text-muted-foreground hover:text-foreground text-sm transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          Logout
+        </button>
+      </div>
+
+      <div className="flex gap-1 p-1 bg-secondary rounded-xl w-fit mb-6 flex-wrap">
+        {tabs.map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => setTab(key)}
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-medium capitalize transition-all ${
+              tab === key ? "bg-primary text-black shadow-sm" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Icon className="w-3.5 h-3.5" />
+            {label}
+            {key === "messages" && messages.length > 0 && (
+              <span className="ml-1 bg-black/20 text-current text-xs rounded-full px-1.5 py-0.5 leading-none">
+                {messages.length}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {(tab === "videos" || tab === "documents") && (
+        <div className="flex gap-1 p-1 bg-card border border-border rounded-xl w-fit mb-6">
+          {sections.map((s) => (
+            <button
+              key={s}
+              onClick={() => setSection(s)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-all ${
+                section === s ? "bg-secondary text-foreground border border-border" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {tab === "videos" && (
+        <div className="space-y-6">
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <h3 className="font-bold text-foreground flex items-center gap-2">
+                <Plus className="w-4 h-4 text-primary" />
+                Add Video
+              </h3>
+              <div className="flex gap-1 p-0.5 bg-secondary rounded-lg ml-auto">
+                <button
+                  onClick={() => setVideoMode("youtube")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${videoMode === "youtube" ? "bg-primary text-black" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <Youtube className="w-3 h-3" /> YouTube Link
+                </button>
+                <button
+                  onClick={() => setVideoMode("upload")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${videoMode === "upload" ? "bg-primary text-black" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <Upload className="w-3 h-3" /> Device Storage
+                </button>
+              </div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <input
+                type="text"
+                placeholder="Video title"
+                value={videoForm.title}
+                onChange={(e) => setVideoForm({ ...videoForm, title: e.target.value })}
+                className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              />
+              <input
+                type="text"
+                placeholder="Description (optional)"
+                value={videoForm.description}
+                onChange={(e) => setVideoForm({ ...videoForm, description: e.target.value })}
+                className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              />
+              {videoMode === "youtube" ? (
+                <>
+                  <input
+                    type="url"
+                    placeholder="YouTube URL (https://youtube.com/watch?v=...)"
+                    value={videoForm.youtubeUrl}
+                    onChange={(e) => setVideoForm({ ...videoForm, youtubeUrl: e.target.value })}
+                    className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors sm:col-span-2"
+                  />
+                  <button
+                    onClick={() => {
+                      if (!videoForm.title || !videoForm.youtubeUrl) return;
+                      createVideo(
+                        { data: { title: videoForm.title, description: videoForm.description || null, section, videoType: "youtube", youtubeUrl: videoForm.youtubeUrl } },
+                        {
+                          onSuccess: () => {
+                            setVideoForm({ title: "", description: "", youtubeUrl: "" });
+                            refetchVideos();
+                            toast({ title: "Video added" });
+                          },
+                        },
+                      );
+                    }}
+                    className="px-5 py-2.5 rounded-xl gold-gradient text-black text-sm font-bold hover:opacity-90 transition-opacity flex items-center gap-2 w-fit"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Video
+                  </button>
+                </>
+              ) : (
+                <div className="sm:col-span-2">
+                  <input ref={videoFileRef} type="file" className="hidden" accept="video/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) { void handleVideoFileUpload(f); e.target.value = ""; } }} />
+                  <button
+                    onClick={() => videoFileRef.current?.click()}
+                    disabled={videoUploading || !videoForm.title}
+                    className="px-5 py-2.5 rounded-xl gold-gradient text-black text-sm font-bold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity flex items-center gap-2"
+                  >
+                    {videoUploading ? (
+                      <><RefreshCw className="w-4 h-4 animate-spin" /> Uploading… {videoUploadPct}%</>
+                    ) : (
+                      <><Upload className="w-4 h-4" /> Choose Video (max 8GB)</>
+                    )}
+                  </button>
+                  {videoUploading && (
+                    <div className="mt-2 w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full gold-gradient rounded-full transition-all duration-300" style={{ width: `${videoUploadPct}%` }} />
+                    </div>
+                  )}
+                  {!videoForm.title && <p className="text-xs text-muted-foreground mt-2">Enter a title above first</p>}
+                </div>
+              )}
+            </div>
+          </div>
+          {videos.length > 0 && (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {videos.map((v) => (
+                <VideoCard
+                  key={v.id}
+                  video={v}
+                  isAdmin
+                  onDelete={(id) =>
+                    deleteVideo({ id }, {
+                      onSuccess: () => { refetchVideos(); toast({ title: "Video deleted" }); },
+                    })
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "documents" && (
+        <div className="space-y-6">
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <h3 className="font-bold text-foreground flex items-center gap-2">
+                <Plus className="w-4 h-4 text-primary" />
+                Add Document
+              </h3>
+              <div className="flex gap-1 p-0.5 bg-secondary rounded-lg ml-auto">
+                <button
+                  onClick={() => setDocMode("text")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${docMode === "text" ? "bg-primary text-black" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <FileText className="w-3 h-3" /> Text
+                </button>
+                <button
+                  onClick={() => setDocMode("upload")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${docMode === "upload" ? "bg-primary text-black" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <Upload className="w-3 h-3" /> PDF Upload
+                </button>
+              </div>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <input
+                type="text"
+                placeholder="Document title"
+                value={docForm.title}
+                onChange={(e) => setDocForm({ ...docForm, title: e.target.value })}
+                className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              />
+              <input
+                type="text"
+                placeholder="Description (optional)"
+                value={docForm.description}
+                onChange={(e) => setDocForm({ ...docForm, description: e.target.value })}
+                className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              />
+              {docMode === "text" ? (
+                <>
+                  <textarea
+                    placeholder="Document content"
+                    value={docForm.content}
+                    onChange={(e) => setDocForm({ ...docForm, content: e.target.value })}
+                    rows={4}
+                    className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors resize-none sm:col-span-2"
+                  />
+                  <button
+                    onClick={() => {
+                      if (!docForm.title) return;
+                      createDocument(
+                        { data: { title: docForm.title, description: docForm.description || null, section, docType: "text", content: docForm.content || null } },
+                        {
+                          onSuccess: () => {
+                            setDocForm({ title: "", description: "", content: "", docType: "text" });
+                            refetchDocs();
+                            toast({ title: "Document added" });
+                          },
+                        },
+                      );
+                    }}
+                    className="px-5 py-2.5 rounded-xl gold-gradient text-black text-sm font-bold hover:opacity-90 transition-opacity flex items-center gap-2 w-fit"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Document
+                  </button>
+                </>
+              ) : (
+                <div className="sm:col-span-2">
+                  <input ref={docFileRef} type="file" className="hidden" accept="application/pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) { void handleDocFileUpload(f); e.target.value = ""; } }} />
+                  <button
+                    onClick={() => docFileRef.current?.click()}
+                    disabled={docUploading || !docForm.title}
+                    className="px-5 py-2.5 rounded-xl gold-gradient text-black text-sm font-bold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity flex items-center gap-2"
+                  >
+                    {docUploading ? (
+                      <><RefreshCw className="w-4 h-4 animate-spin" /> Uploading… {docUploadPct}%</>
+                    ) : (
+                      <><Upload className="w-4 h-4" /> Choose PDF (max 8GB)</>
+                    )}
+                  </button>
+                  {docUploading && (
+                    <div className="mt-2 w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-full gold-gradient rounded-full transition-all duration-300" style={{ width: `${docUploadPct}%` }} />
+                    </div>
+                  )}
+                  {!docForm.title && <p className="text-xs text-muted-foreground mt-2">Enter a title above first</p>}
+                </div>
+              )}
+            </div>
+          </div>
+          {documents.length > 0 && (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {documents.map((d) => (
+                <DocumentCard
+                  key={d.id}
+                  document={d}
+                  isAdmin
+                  onDelete={(id) =>
+                    deleteDocument({ id }, {
+                      onSuccess: () => { refetchDocs(); toast({ title: "Document deleted" }); },
+                    })
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "strategies" && (
+        <div className="space-y-6">
+          <div className="bg-card border border-border rounded-2xl p-5">
+            <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+              <Plus className="w-4 h-4 text-primary" />
+              Add Strategy
+            </h3>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <input
+                type="text"
+                placeholder="Strategy title"
+                value={stratForm.title}
+                onChange={(e) => setStratForm({ ...stratForm, title: e.target.value })}
+                className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              />
+              <select
+                value={stratForm.section}
+                onChange={(e) => setStratForm({ ...stratForm, section: e.target.value as Section })}
+                className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm focus:outline-none focus:border-primary/50 transition-colors"
+              >
+                <option value="binary">Binary</option>
+                <option value="forex">Forex</option>
+                <option value="general">General</option>
+              </select>
+              <textarea
+                placeholder="Strategy content…"
+                value={stratForm.content}
+                onChange={(e) => setStratForm({ ...stratForm, content: e.target.value })}
+                rows={5}
+                className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors resize-none sm:col-span-2"
+              />
+              <input
+                type="text"
+                placeholder="Tags (comma separated)"
+                value={stratForm.tags}
+                onChange={(e) => setStratForm({ ...stratForm, tags: e.target.value })}
+                className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              />
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={stratForm.isPinned}
+                  onChange={(e) => setStratForm({ ...stratForm, isPinned: e.target.checked })}
+                  className="w-4 h-4 accent-yellow-400"
+                />
+                <span className="text-sm text-foreground">Pin this strategy</span>
+              </label>
+              <button
+                onClick={() => {
+                  if (!stratForm.title || !stratForm.content) return;
+                  createStrategy(
+                    { data: { title: stratForm.title, content: stratForm.content, section: stratForm.section, tags: stratForm.tags || null, isPinned: stratForm.isPinned } },
+                    {
+                      onSuccess: () => {
+                        setStratForm({ title: "", content: "", tags: "", isPinned: false, section: "general" });
+                        refetchStrats();
+                        toast({ title: "Strategy added" });
+                      },
+                    },
+                  );
+                }}
+                className="px-5 py-2.5 rounded-xl gold-gradient text-black text-sm font-bold hover:opacity-90 transition-opacity flex items-center gap-2 w-fit sm:col-span-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Strategy
+              </button>
+            </div>
+          </div>
+          {strategies.length > 0 && (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {strategies.map((s) => (
+                <StrategyCard
+                  key={s.id}
+                  strategy={s}
+                  isAdmin
+                  onEdit={(strat) => setEditingStrategy(strat)}
+                  onDelete={(id) =>
+                    deleteStrategy({ id }, {
+                      onSuccess: () => { refetchStrats(); toast({ title: "Strategy deleted" }); },
+                    })
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "messages" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-muted-foreground">{messages.length} messages in community chat</p>
+            <button onClick={() => refetchMessages()} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+              <RefreshCw className="w-3.5 h-3.5" /> Refresh
+            </button>
+          </div>
+          {messages.length === 0 ? (
+            <div className="text-center py-16">
+              <MessageCircle className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-muted-foreground text-sm">No messages yet</p>
+            </div>
+          ) : (
+            [...messages].reverse().map((msg) => (
+              <div
+                key={msg.id}
+                className="flex items-start gap-3 bg-card border border-border rounded-xl p-4 group"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <span className="font-semibold text-sm text-foreground">{msg.authorName}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(msg.createdAt).toLocaleString()}
+                    </span>
+                  </div>
+                  {msg.content && <p className="text-sm text-foreground/80 break-words">{msg.content}</p>}
+                  {msg.mediaUrl && (
+                    <a href={msg.mediaUrl} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline mt-1 inline-block">
+                      View attachment
+                    </a>
+                  )}
+                </div>
+                <button
+                  onClick={() =>
+                    deleteMessage({ id: msg.id }, {
+                      onSuccess: () => { refetchMessages(); toast({ title: "Message deleted" }); },
+                    })
+                  }
+                  className="flex-shrink-0 opacity-0 group-hover:opacity-100 flex items-center gap-1.5 text-xs text-destructive hover:text-destructive/80 transition-all"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {tab === "code" && (
+        <div className="max-w-xl space-y-6">
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center">
+                <Code2 className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold">Source Code Access</h3>
+                <p className="text-xs text-muted-foreground">Get a secure link to view your website's source code</p>
+              </div>
+            </div>
+
+            {codeError && (
+              <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2 mb-4">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                {codeError}
+              </div>
+            )}
+
+            {codeStep === "idle" && (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Click below to send a one-time code to <strong className="text-foreground">onxy9.info@gmail.com</strong>. Enter the code to get a 24-hour access link to your source code.
+                </p>
+                <p className="text-xs text-amber-400/80 bg-amber-400/10 border border-amber-400/20 rounded-lg px-3 py-2">
+                  Requires SMTP_USER and SMTP_PASS to be set in your environment secrets for email delivery.
+                </p>
+                <button
+                  onClick={handleCodeRequest}
+                  disabled={codeLoading}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl gold-gradient text-black text-sm font-bold hover:opacity-90 disabled:opacity-40 transition-opacity"
+                >
+                  {codeLoading ? <><RefreshCw className="w-4 h-4 animate-spin" /> Sending…</> : <><Send className="w-4 h-4" /> Send Code to Email</>}
+                </button>
+              </div>
+            )}
+
+            {codeStep === "sent" && (
+              <div className="space-y-4">
+                <p className="text-sm text-green-500 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2 flex items-center gap-2">
+                  <Check className="w-4 h-4" />
+                  Code sent to onxy9.info@gmail.com
+                </p>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Enter 6-Digit Code</label>
+                  <input
+                    type="text"
+                    value={codeOtp}
+                    onChange={(e) => setCodeOtp(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground text-center text-2xl font-mono tracking-widest focus:outline-none focus:border-primary/50 transition-colors"
+                    placeholder="000000"
+                    maxLength={6}
+                    autoFocus
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCodeVerify}
+                    disabled={codeOtp.length < 6 || codeLoading}
+                    className="flex-1 py-2.5 rounded-xl gold-gradient text-black text-sm font-bold hover:opacity-90 disabled:opacity-40 transition-opacity"
+                  >
+                    {codeLoading ? "Verifying…" : "Verify & Get Link"}
+                  </button>
+                  <button
+                    onClick={() => { setCodeStep("idle"); setCodeOtp(""); setCodeError(""); }}
+                    className="px-4 py-2.5 rounded-xl border border-border bg-secondary text-foreground text-sm hover:border-primary/30 transition-colors"
+                  >
+                    Resend
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {codeStep === "done" && codeToken && (
+              <div className="space-y-4">
+                <p className="text-sm text-green-500 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2 flex items-center gap-2">
+                  <Check className="w-4 h-4" />
+                  Access granted — link valid for 24 hours
+                </p>
+                <div className="bg-secondary border border-border rounded-xl p-3">
+                  <p className="text-xs text-muted-foreground mb-2">Your code access link:</p>
+                  <p className="text-xs font-mono text-primary break-all">{window.location.origin}/code-access?token={codeToken}</p>
+                </div>
+                <div className="flex gap-2">
+                  <a
+                    href={`/code-access?token=${codeToken}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 py-2.5 rounded-xl gold-gradient text-black text-sm font-bold hover:opacity-90 transition-opacity text-center"
+                  >
+                    Open Code Viewer
+                  </a>
+                  <button
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(`${window.location.origin}/code-access?token=${codeToken}`);
+                      toast({ title: "Link copied!" });
+                    }}
+                    className="px-4 py-2.5 rounded-xl border border-border bg-secondary text-foreground text-sm hover:border-primary/30 transition-colors"
+                  >
+                    Copy Link
+                  </button>
+                </div>
+                <button
+                  onClick={() => { setCodeStep("idle"); setCodeToken(""); setCodeOtp(""); setCodeError(""); }}
+                  className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Generate new link
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/pages/code-access.tsx
+============================================================
+import { useState, useEffect } from "react";
+import { Code2, FileCode, ChevronRight, Download, AlertCircle, Pencil, Save, X, CheckCircle, Copy } from "lucide-react";
+import { useSearch } from "wouter";
+
+interface CodeFile {
+  path: string;
+  content: string;
+}
+
+export default function CodeAccessPage() {
+  const search = useSearch();
+  const token = new URLSearchParams(search).get("token") ?? "";
+  const [files, setFiles] = useState<CodeFile[]>([]);
+  const [activeFile, setActiveFile] = useState<string>("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const [editing, setEditing] = useState(false);
+  const [editContent, setEditContent] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [confirmSave, setConfirmSave] = useState(false);
+
+  useEffect(() => {
+    if (!token) {
+      setError("No access token provided. Generate one from the admin panel.");
+      setLoading(false);
+      return;
+    }
+    fetch(`/api/admin/code-view/${token}`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json() as { error?: string };
+          throw new Error(data.error ?? "Access denied");
+        }
+        return res.json() as Promise<CodeFile[]>;
+      })
+      .then((data) => {
+        setFiles(data);
+        setActiveFile(data[0]?.path ?? "");
+      })
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : "Failed to load code");
+      })
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  const activeContent = files.find((f) => f.path === activeFile)?.content ?? "";
+
+  const handleSelectFile = (path: string) => {
+    if (editing) {
+      if (!window.confirm("Discard unsaved changes?")) return;
+    }
+    setActiveFile(path);
+    setEditing(false);
+    setEditContent("");
+    setSaveMsg(null);
+    setConfirmSave(false);
+  };
+
+  const handleStartEdit = () => {
+    setEditContent(activeContent);
+    setEditing(true);
+    setSaveMsg(null);
+    setConfirmSave(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditing(false);
+    setEditContent("");
+    setSaveMsg(null);
+    setConfirmSave(false);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveMsg(null);
+    try {
+      const res = await fetch("/api/admin/code-write", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, filepath: activeFile, content: editContent }),
+      });
+      const data = await res.json() as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Save failed");
+      setFiles((prev) => prev.map((f) => f.path === activeFile ? { ...f, content: editContent } : f));
+      setEditing(false);
+      setConfirmSave(false);
+      setSaveMsg({ ok: true, text: "Saved! Website will update automatically." });
+      setTimeout(() => setSaveMsg(null), 5000);
+    } catch (err) {
+      setSaveMsg({ ok: false, text: err instanceof Error ? err.message : "Save failed" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCopy = async (text: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadAll = () => {
+    const text = files.map((f) => `${"=".repeat(60)}\n// FILE: ${f.path}\n${"=".repeat(60)}\n${f.content}`).join("\n\n");
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "mohim-trading-source.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground text-sm">Loading source code…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-20 text-center">
+        <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+        <h2 className="text-xl font-bold mb-2">Access Denied</h2>
+        <p className="text-muted-foreground text-sm">{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center">
+            <Code2 className="w-5 h-5 text-black" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black">Source Code Viewer & Editor</h1>
+            <p className="text-muted-foreground text-xs">{files.length} files — token valid 24 hours</p>
+          </div>
+        </div>
+        <button
+          onClick={handleDownloadAll}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl gold-gradient text-black text-sm font-bold hover:opacity-90 transition-opacity"
+        >
+          <Download className="w-4 h-4" />
+          Download All Files
+        </button>
+      </div>
+
+      <div className="mb-4 p-3 rounded-xl bg-primary/5 border border-primary/20 text-xs text-muted-foreground leading-relaxed">
+        <strong className="text-foreground">How to update:</strong> একটা file select করুন → <strong>Copy</strong> করুন → developer-কে দিন → developer update করে দিলে → <strong>Edit</strong> ক্লিক করুন → পুরো updated code paste করুন → <strong>Save</strong> করুন। আপনার website automatically update হয়ে যাবে। আপলোড করা video/image/PDF কিছুই হারাবে না।
+      </div>
+
+      {saveMsg && (
+        <div className={`mb-4 p-3 rounded-xl flex items-center gap-2 text-sm ${saveMsg.ok ? "bg-green-500/10 border border-green-500/30 text-green-400" : "bg-destructive/10 border border-destructive/30 text-destructive"}`}>
+          {saveMsg.ok ? <CheckCircle className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
+          {saveMsg.text}
+        </div>
+      )}
+
+      <div className="grid grid-cols-[260px_1fr] gap-4 h-[calc(100vh-280px)] min-h-[500px]">
+        <div className="bg-card border border-border rounded-xl overflow-y-auto">
+          <div className="px-3 py-2 border-b border-border">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Files ({files.length})</p>
+          </div>
+          {files.map((f) => {
+            const parts = f.path.split("/");
+            const filename = parts.at(-1) ?? f.path;
+            const dir = parts.slice(0, -1).join("/");
+            const isUnavailable = f.content === "(not available)";
+            return (
+              <button
+                key={f.path}
+                onClick={() => handleSelectFile(f.path)}
+                className={`w-full text-left px-3 py-2.5 flex items-start gap-2 hover:bg-secondary transition-colors border-b border-border/50 ${
+                  activeFile === f.path ? "bg-primary/10 border-l-2 border-l-primary" : ""
+                } ${isUnavailable ? "opacity-40" : ""}`}
+              >
+                <FileCode className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-foreground truncate">{filename}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{dir}</p>
+                </div>
+                {activeFile === f.path && <ChevronRight className="w-3 h-3 text-primary ml-auto flex-shrink-0 mt-0.5" />}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col">
+          <div className="px-4 py-2.5 border-b border-border flex items-center gap-2 flex-wrap">
+            <p className="text-xs font-mono text-muted-foreground flex-1 min-w-0 truncate">{activeFile}</p>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {!editing ? (
+                <>
+                  <button
+                    onClick={() => handleCopy(activeContent)}
+                    className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
+                  >
+                    {copied ? <CheckCircle className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
+                    {copied ? "Copied!" : "Copy"}
+                  </button>
+                  <button
+                    onClick={handleStartEdit}
+                    disabled={activeContent === "(not available)"}
+                    className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg gold-gradient text-black font-medium hover:opacity-90 transition-opacity disabled:opacity-40"
+                  >
+                    <Pencil className="w-3 h-3" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      const blob = new Blob([activeContent], { type: "text/plain" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = activeFile.split("/").at(-1) ?? "file.txt";
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Download className="w-3 h-3" />
+                    Download
+                  </button>
+                </>
+              ) : (
+                <>
+                  {!confirmSave ? (
+                    <button
+                      onClick={() => setConfirmSave(true)}
+                      disabled={saving}
+                      className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg gold-gradient text-black font-bold hover:opacity-90 transition-opacity disabled:opacity-40"
+                    >
+                      <Save className="w-3 h-3" />
+                      Save & Update Site
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-amber-400 font-medium">এই file overwrite হবে। নিশ্চিত?</span>
+                      <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="text-xs px-2.5 py-1 rounded-lg bg-green-600 text-white font-bold hover:bg-green-500 transition-colors disabled:opacity-40"
+                      >
+                        {saving ? "Saving…" : "হ্যাঁ, Save"}
+                      </button>
+                      <button onClick={() => setConfirmSave(false)} className="text-xs px-2 py-1 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors">না</button>
+                    </div>
+                  )}
+                  <button
+                    onClick={handleCancelEdit}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {editing ? (
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="flex-1 w-full p-4 text-xs font-mono text-foreground/90 leading-relaxed bg-black/20 resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 border-none"
+              spellCheck={false}
+              autoCorrect="off"
+              autoCapitalize="off"
+            />
+          ) : (
+            <pre className="flex-1 overflow-auto p-4 text-xs font-mono text-foreground/90 leading-relaxed whitespace-pre bg-black/20">
+              {activeContent}
+            </pre>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/components/nav.tsx
+============================================================
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
+import { TrendingUp, Menu, X, BarChart2, BookOpen, MessageCircle, Settings, Home } from "lucide-react";
+import { useListStrategies } from "@workspace/api-client-react";
+
+export default function Nav() {
+  const [location] = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const { data: strategies = [] } = useListStrategies();
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const newCount = strategies.filter(
+    (s) => new Date(s.createdAt) > sevenDaysAgo,
+  ).length;
+
+  const navLinks = [
+    { href: "/", label: "Home", icon: Home, badge: 0 },
+    { href: "/binary", label: "Binary Trading", icon: TrendingUp, badge: 0 },
+    { href: "/forex", label: "Forex Trading", icon: BarChart2, badge: 0 },
+    { href: "/strategy", label: "Strategies", icon: BookOpen, badge: newCount },
+    { href: "/chat", label: "Community", icon: MessageCircle, badge: 0 },
+  ];
+
+  return (
+    <nav className="sticky top-0 z-50 border-b border-border bg-card/90 backdrop-blur-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-lg gold-gradient flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-black" />
+            </div>
+            <span className="text-lg font-bold">
+              <span className="gold-text">Mohim</span>
+              <span className="text-foreground"> Trading</span>
+            </span>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map(({ href, label, badge }) => {
+              const isActive = location === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? "bg-primary/15 text-primary border border-primary/30"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  }`}
+                >
+                  {label}
+                  {badge > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-primary text-black text-[10px] font-black flex items-center justify-center px-1 leading-none">
+                      {badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+            <Link
+              href="/admin"
+              className={`ml-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                location === "/admin"
+                  ? "bg-primary/15 text-primary border border-primary/30"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <button
+            className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border bg-card/95 backdrop-blur-md px-4 py-3 flex flex-col gap-1">
+          {navLinks.map(({ href, label, icon: Icon, badge }) => {
+            const isActive = location === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMobileOpen(false)}
+                className={`relative flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive
+                    ? "bg-primary/15 text-primary border border-primary/30"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+                {badge > 0 && (
+                  <span className="ml-auto min-w-[20px] h-5 rounded-full bg-primary text-black text-xs font-black flex items-center justify-center px-1">
+                    {badge}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+          <Link
+            href="/admin"
+            onClick={() => setMobileOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+              location === "/admin"
+                ? "bg-primary/15 text-primary border border-primary/30"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            Admin Panel
+          </Link>
+        </div>
+      )}
+    </nav>
+  );
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/components/video-card.tsx
+============================================================
+import { useState } from "react";
+import { Play, Trash2, Youtube, Upload, Link2, Share2, Check } from "lucide-react";
+import type { Video } from "@workspace/api-client-react";
+
+function getYouTubeId(url: string): string | null {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+  return match ? (match[1] ?? null) : null;
+}
+
+function getYouTubeThumbnail(url: string): string | null {
+  const id = getYouTubeId(url);
+  return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null;
+}
+
+interface VideoCardProps {
+  video: Video;
+  isAdmin?: boolean;
+  onDelete?: (id: number) => void;
+  onPlay?: (video: Video) => void;
+}
+
+export default function VideoCard({ video, isAdmin, onDelete, onPlay }: VideoCardProps) {
+  const [copied, setCopied] = useState(false);
+
+  const thumbnail =
+    video.thumbnailUrl ||
+    (video.youtubeUrl ? getYouTubeThumbnail(video.youtubeUrl) : null);
+
+  const shareUrl = video.youtubeUrl || video.fileUrl || window.location.href;
+
+  const handleCopyLink = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const handleDeviceShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: video.title,
+          text: video.description ?? `Watch: ${video.title}`,
+          url: shareUrl,
+        });
+      } catch {
+        /* user cancelled */
+      }
+    } else {
+      await handleCopyLink(e);
+    }
+  };
+
+  return (
+    <div className="group bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 card-glow">
+      <div
+        className="relative aspect-video bg-muted cursor-pointer"
+        onClick={() => onPlay?.(video)}
+      >
+        {thumbnail ? (
+          <img
+            src={thumbnail}
+            alt={video.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-secondary">
+            <Play className="w-12 h-12 text-muted-foreground" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center">
+            <Play className="w-6 h-6 text-black fill-black ml-0.5" />
+          </div>
+        </div>
+        <div className="absolute top-2 left-2">
+          {video.videoType === "youtube" ? (
+            <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-black/70 text-red-400 text-xs font-medium">
+              <Youtube className="w-3 h-3" />
+              YouTube
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-black/70 text-primary text-xs font-medium">
+              <Upload className="w-3 h-3" />
+              Uploaded
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="p-4">
+        <h3
+          className="font-semibold text-foreground text-sm mb-1 line-clamp-2 cursor-pointer hover:text-primary transition-colors"
+          onClick={() => onPlay?.(video)}
+        >
+          {video.title}
+        </h3>
+        {video.description && (
+          <p className="text-muted-foreground text-xs line-clamp-2">{video.description}</p>
+        )}
+        <div className="flex items-center gap-3 mt-3 flex-wrap">
+          {video.youtubeUrl && (
+            <button
+              onClick={handleCopyLink}
+              title="Copy YouTube link"
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Link2 className="w-3.5 h-3.5" />}
+              {copied ? "Copied!" : "Copy YT Link"}
+            </button>
+          )}
+          <button
+            onClick={handleDeviceShare}
+            title="Share via device"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            Share
+          </button>
+          {isAdmin && onDelete && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(video.id); }}
+              className="flex items-center gap-1.5 text-xs text-destructive hover:text-destructive/80 transition-colors ml-auto"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/components/document-card.tsx
+============================================================
+import { useState } from "react";
+import { FileText, Trash2, ExternalLink, FileType, X, Eye } from "lucide-react";
+import type { Document } from "@workspace/api-client-react";
+
+interface DocumentCardProps {
+  document: Document;
+  isAdmin?: boolean;
+  onDelete?: (id: number) => void;
+}
+
+export default function DocumentCard({ document, isAdmin, onDelete }: DocumentCardProps) {
+  const [pdfOpen, setPdfOpen] = useState(false);
+
+  const isPdf = document.docType === "pdf";
+  const hasFile = !!document.fileUrl;
+
+  const handleOpen = () => {
+    if (isPdf && hasFile) {
+      setPdfOpen(true);
+    } else if (document.fileUrl) {
+      window.open(document.fileUrl, "_blank");
+    }
+  };
+
+  return (
+    <>
+      <div className="bg-card border border-border rounded-xl p-5 transition-all duration-300 card-glow group">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/20 flex items-center justify-center flex-shrink-0">
+            {isPdf ? (
+              <FileType className="w-6 h-6 text-primary" />
+            ) : (
+              <FileText className="w-6 h-6 text-primary" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-semibold text-foreground text-sm leading-tight line-clamp-2">
+                {document.title}
+              </h3>
+              <span className="flex-shrink-0 px-2 py-0.5 rounded-md bg-secondary border border-border text-muted-foreground text-xs uppercase">
+                {document.docType}
+              </span>
+            </div>
+            {document.description && (
+              <p className="text-muted-foreground text-xs mt-1.5 line-clamp-2">{document.description}</p>
+            )}
+            {document.content && document.docType === "text" && (
+              <p className="text-muted-foreground text-xs mt-1.5 line-clamp-3 bg-muted/50 rounded-lg p-2">
+                {document.content}
+              </p>
+            )}
+            <div className="flex items-center gap-3 mt-3">
+              {hasFile && isPdf && (
+                <button
+                  onClick={handleOpen}
+                  className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors font-medium"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  View PDF
+                </button>
+              )}
+              {hasFile && !isPdf && (
+                <button
+                  onClick={handleOpen}
+                  className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Open
+                </button>
+              )}
+              {isAdmin && onDelete && (
+                <button
+                  onClick={() => onDelete(document.id)}
+                  className="flex items-center gap-1.5 text-xs text-destructive hover:text-destructive/80 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {pdfOpen && document.fileUrl && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 bg-card border-b border-border">
+            <div className="flex items-center gap-2">
+              <FileType className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold text-foreground truncate max-w-xs">{document.title}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <a
+                href={document.fileUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Open in tab
+              </a>
+              <button
+                onClick={() => setPdfOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
+          </div>
+          <iframe
+            src={document.fileUrl}
+            className="flex-1 w-full border-0"
+            title={document.title}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/src/components/strategy-card.tsx
+============================================================
+import { useState } from "react";
+import { Pin, Trash2, Tag, Clock, ChevronDown, ChevronUp, Link2, Check, Pencil } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import type { Strategy } from "@workspace/api-client-react";
+
+const PREVIEW_LENGTH = 220;
+
+interface StrategyCardProps {
+  strategy: Strategy;
+  isAdmin?: boolean;
+  onDelete?: (id: number) => void;
+  onEdit?: (strategy: Strategy) => void;
+}
+
+export default function StrategyCard({ strategy, isAdmin, onDelete, onEdit }: StrategyCardProps) {
+  const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const tags = strategy.tags ? strategy.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+  const timeAgo = formatDistanceToNow(new Date(strategy.createdAt), { addSuffix: true });
+
+  const isLong = strategy.content.length > PREVIEW_LENGTH;
+  const displayContent = isLong && !expanded
+    ? strategy.content.slice(0, PREVIEW_LENGTH) + "…"
+    : strategy.content;
+
+  const handleCopyLink = async () => {
+    const url = `${window.location.origin}/strategy#s${strategy.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return (
+    <div
+      id={`s${strategy.id}`}
+      className={`bg-card border rounded-xl p-5 transition-all duration-300 card-glow ${
+        strategy.isPinned ? "border-primary/40 bg-primary/5" : "border-border"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <h3 className="font-semibold text-foreground leading-tight">{strategy.title}</h3>
+        {strategy.isPinned && (
+          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+            <Pin className="w-3.5 h-3.5 text-primary fill-primary" />
+          </div>
+        )}
+      </div>
+
+      <p className="text-muted-foreground text-sm leading-relaxed mb-1 whitespace-pre-line">
+        {displayContent}
+      </p>
+      {isLong && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors mb-3 mt-1"
+        >
+          {expanded ? (
+            <><ChevronUp className="w-3.5 h-3.5" /> Collapse</>
+          ) : (
+            <><ChevronDown className="w-3.5 h-3.5" /> Read more</>
+          )}
+        </button>
+      )}
+      {!isLong && <div className="mb-3" />}
+
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent/50 border border-primary/20 text-accent-foreground text-xs"
+            >
+              <Tag className="w-2.5 h-2.5" />
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+          <Clock className="w-3 h-3" />
+          {timeAgo}
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleCopyLink}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+          >
+            {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Link2 className="w-3.5 h-3.5" />}
+            {copied ? "Copied!" : "Copy link"}
+          </button>
+          {isAdmin && onEdit && (
+            <button
+              onClick={() => onEdit(strategy)}
+              className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Edit
+            </button>
+          )}
+          {isAdmin && onDelete && (
+            <button
+              onClick={() => onDelete(strategy.id)}
+              className="flex items-center gap-1.5 text-xs text-destructive hover:text-destructive/80 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+============================================================
+// FILE: artifacts/mohim-trading/vite.config.ts
+============================================================
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import path from "path";
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+
+const rawPort = process.env.PORT;
+
+if (!rawPort) {
+  throw new Error(
+    "PORT environment variable is required but was not provided.",
+  );
+}
+
+const port = Number(rawPort);
+
+if (Number.isNaN(port) || port <= 0) {
+  throw new Error(`Invalid PORT value: "${rawPort}"`);
+}
+
+const basePath = process.env.BASE_PATH;
+
+if (!basePath) {
+  throw new Error(
+    "BASE_PATH environment variable is required but was not provided.",
+  );
+}
+
+export default defineConfig({
+  base: basePath,
+  plugins: [
+    react(),
+    tailwindcss(),
+    runtimeErrorOverlay(),
+    ...(process.env.NODE_ENV !== "production" &&
+    process.env.REPL_ID !== undefined
+      ? [
+          await import("@replit/vite-plugin-cartographer").then((m) =>
+            m.cartographer({
+              root: path.resolve(import.meta.dirname, ".."),
+            }),
+          ),
+          await import("@replit/vite-plugin-dev-banner").then((m) =>
+            m.devBanner(),
+          ),
+        ]
+      : []),
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(import.meta.dirname, "src"),
+      "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+    },
+    dedupe: ["react", "react-dom"],
+  },
+  root: path.resolve(import.meta.dirname),
+  build: {
+    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    emptyOutDir: true,
+  },
+  server: {
+    port,
+    strictPort: true,
+    host: "0.0.0.0",
+    allowedHosts: true,
+    fs: {
+      strict: true,
+    },
+  },
+  preview: {
+    port,
+    host: "0.0.0.0",
+    allowedHosts: true,
+  },
+});
+
+
+============================================================
+// FILE: artifacts/mohim-trading/package.json
+============================================================
+{
+  "name": "@workspace/mohim-trading",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config vite.config.ts --host 0.0.0.0",
+    "build": "vite build --config vite.config.ts",
+    "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@hookform/resolvers": "^3.10.0",
+    "@radix-ui/react-accordion": "^1.2.4",
+    "@radix-ui/react-alert-dialog": "^1.1.7",
+    "@radix-ui/react-aspect-ratio": "^1.1.3",
+    "@radix-ui/react-avatar": "^1.1.4",
+    "@radix-ui/react-checkbox": "^1.1.5",
+    "@radix-ui/react-collapsible": "^1.1.4",
+    "@radix-ui/react-context-menu": "^2.2.7",
+    "@radix-ui/react-dialog": "^1.1.7",
+    "@radix-ui/react-dropdown-menu": "^2.1.7",
+    "@radix-ui/react-hover-card": "^1.1.7",
+    "@radix-ui/react-label": "^2.1.3",
+    "@radix-ui/react-menubar": "^1.1.7",
+    "@radix-ui/react-navigation-menu": "^1.2.6",
+    "@radix-ui/react-popover": "^1.1.7",
+    "@radix-ui/react-progress": "^1.1.3",
+    "@radix-ui/react-radio-group": "^1.2.4",
+    "@radix-ui/react-scroll-area": "^1.2.4",
+    "@radix-ui/react-select": "^2.1.7",
+    "@radix-ui/react-separator": "^1.1.3",
+    "@radix-ui/react-slider": "^1.2.4",
+    "@radix-ui/react-slot": "^1.2.0",
+    "@radix-ui/react-switch": "^1.1.4",
+    "@radix-ui/react-tabs": "^1.1.4",
+    "@radix-ui/react-toast": "^1.2.7",
+    "@radix-ui/react-toggle": "^1.1.3",
+    "@radix-ui/react-toggle-group": "^1.1.3",
+    "@radix-ui/react-tooltip": "^1.2.0",
+    "@replit/vite-plugin-cartographer": "catalog:",
+    "@replit/vite-plugin-dev-banner": "catalog:",
+    "@replit/vite-plugin-runtime-error-modal": "catalog:",
+    "@tailwindcss/typography": "^0.5.15",
+    "@tailwindcss/vite": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@workspace/api-client-react": "workspace:*",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "cmdk": "^1.1.1",
+    "date-fns": "^3.6.0",
+    "embla-carousel-react": "^8.6.0",
+    "framer-motion": "catalog:",
+    "input-otp": "^1.4.2",
+    "lucide-react": "catalog:",
+    "next-themes": "^0.4.6",
+    "react": "catalog:",
+    "react-day-picker": "^9.11.1",
+    "react-dom": "catalog:",
+    "react-hook-form": "^7.55.0",
+    "react-icons": "^5.4.0",
+    "react-resizable-panels": "^2.1.7",
+    "recharts": "^2.15.2",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "catalog:",
+    "tailwindcss": "catalog:",
+    "tw-animate-css": "^1.4.0",
+    "vaul": "^1.1.2",
+    "vite": "catalog:",
+    "wouter": "^3.3.5",
+    "zod": "catalog:"
+  }
+}
+
+
+============================================================
+// FILE: artifacts/api-server/package.json
+============================================================
+{
+  "name": "@workspace/api-server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "export NODE_ENV=development && pnpm run build && pnpm run start",
+    "build": "node ./build.mjs",
+    "start": "node --enable-source-maps ./dist/index.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@workspace/api-zod": "workspace:*",
+    "@workspace/db": "workspace:*",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2",
+    "drizzle-orm": "catalog:",
+    "express": "^5",
+    "express-session": "^1.18.1",
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.7",
+    "pino": "^9",
+    "pino-http": "^10"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/express-session": "^1.18.1",
+    "@types/multer": "^2.1.0",
+    "@types/node": "catalog:",
+    "@types/nodemailer": "^8.0.0",
+    "esbuild": "^0.27.3",
+    "esbuild-plugin-pino": "^2.3.3",
+    "pino-pretty": "^13",
+    "thread-stream": "3.1.0"
+  }
+}
